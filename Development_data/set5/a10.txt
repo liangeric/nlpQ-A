@@ -1,0 +1,107 @@
+Sea lion
+
+
+Sea lions are sea mammals characterized by external ear flaps, long foreflippers, the ability to walk on all fours, and short, thick hair, big chest and belly. Together with the fur seals, they comprise the family Otariidae, eared seals, which contains six extant and one extinct species (the Japanese sea lion) in five genera. Their range extends from the subarctic to tropical waters of the global ocean in both the Northern and Southern Hemispheres, with the notable exception of the northern Atlantic Ocean. They have an average lifespan of 20–30 years. A male California sea lion weighs on average about 300 kg (660 lb) and is about 8 ft (2.4 m) long, while the female sea lion weighs 100 kg (220 lb) and is 6 ft (1.8 m) long. The largest sea lion is Steller's sea lion, which can weigh 1,000 kg (2,200 lb) and grow to a length of 10 ft (3.0 m). Sea lions consume large quantities of food at a time and are known to eat about 5–8% of their body weight (about 15–35 lb (6.8–15.9 kg)) at a single feeding.
+
+
+Taxonomy
+
+Together with the fur seals, they constitute the family Otariidae, collectively known as eared seals. Until recently, sea lions were grouped under a single subfamily called Otariinae, whereas fur seals were grouped in the subfamily Arcocephalinae. This division was based on the most prominent common feature shared by the fur seals and absent in the sea lions, namely the dense underfur characteristic of the former. Recent genetic evidence, suggests Callorhinus, the genus of the northern fur seal, is more closely related to some sea lion species than to the other fur seal genus, Arctocephalus. Therefore, the fur seal/sea lion subfamily distinction has been eliminated from many taxonomies.
+Sea lions are related to the walrus and the seal. Nonetheless, all fur seals have certain features in common: the fur, generally smaller sizes, farther and longer foraging trips, smaller and more abundant prey items, and greater sexual dimorphism. All sea lions have certain features in common, in particular their coarse, short fur, greater bulk, and larger prey than fur seals. For these reasons, the distinction remains useful. The family Otariidae (Order Carnivora) contains the 14 extant species of fur seals and sea lions. Traditional classification of the family into the subfamilies Arctocephalinae (fur seals) and Otariinae (sea lions) is not supported, with the fur seal Callorhinus ursinus having a basal relationship relative to the rest of the family. This is consistent with the fossil record which suggests that this genus diverged from the line leading to the remaining fur seals and sea lions about 6 million years ago (mya). Similar genetic divergences between the sea lion clades as well as between the major Arctocephalus fur seal clades, suggest that these groups underwent periods of rapid radiation at about the time they diverged from each other. The phylogenetic relationships within the family and the genetic distances among some taxa highlight inconsistencies in the current taxonomic classification of the family.
+Arctocephalus is characterized by ancestral character states such as dense underfur and the presence of double rooted cheek teeth and is thus thought to represent the most “primitive” line. It was from this basal line that both the sea lions and the remaining fur seal genus, Callorhinus, are thought to have diverged. The fossil record from the western coast of North America presents evidence for the divergence of Callorhinus about 6 mya, whereas fossils in both California and Japan suggest that sea lions did not diverge until years later.
+Suborder Pinnipedia
+Family Otariidae
+Subfamily Arctocephalinae
+Genus Arctocephalus (southern fur seal; eight species)
+Genus Callorhinus (northern fur seal; one species)
+
+Subfamily Otariinae
+Genus Eumetopias
+Steller's sea lion, E. jubatus
+
+Genus Neophoca
+Australian sea lion, N. cinerea
+
+Genus Otaria
+South American sea lion, O. flavescens
+
+Genus Phocarctos
+New Zealand sea lion or Hooker's sea lion, P. hookeri
+
+Genus Zalophus
+California sea lion, Z. californianus
+Japanese sea lion, Z. japonicus – extinct (1950s)
+Galapagos sea lion, Z. wollebaeki
+
+Family Phocidae: true seals
+Family Odobenidae: walrus
+
+
+Physiology
+
+
+Diving adaptations
+
+There are many components that make up sea lion physiology and these processes control aspects of their behavior. Physiology dictates thermoregulation, osmoregulation, reproduction, metabolic rate, and many other aspects on sea lion ecology including but not limited to their ability to dive to great depths. The sea lions' bodies control heart rate, gas exchange, digestion rate, and blood flow to allow individuals to dive for a long period of time and prevent side-effects of high pressure at depth.
+The high pressures associated with deep dives cause gases such as nitrogen to build up in tissues which are then released upon surfacing, possibly causing death. One of the ways sea lions deal with the extreme pressures is by limiting the amount of gas exchange that occurs when diving. The sea lion allows the alveoli to be compressed by the increasing water pressure thus forcing the surface air into cartilage lined airway just before the gas exchange surface. This process prevents any further oxygen exchange to the blood for muscles, requiring all muscles to be loaded with enough oxygen to last the duration of the dive. However, this shunt reduces the amount of compressed gases from entering tissues therefore reducing the risk of decompression sickness. The collapse of alveoli does not allow for any oxygen storage in the lungs however, this means that sea lions must mitigate oxygen use in order to extend their dives. Oxygen availability is prolonged by the physiological control of heart rate in the sea lions. By reducing heart rate to well below surface rates, oxygen is saved by reducing gas exchange as well as reducing the energy required for a high heart rate. Bradycardia is a control mechanism to allow a switch from pulmonary oxygen to oxygen stored in the muscles which is needed when the sea lions are diving to depth. Another way sea lions mitigate the oxygen obtained at the surface in dives is to reduce digestion rate. Digestion requires metabolic activity and therefore energy and oxygen are consumed during this process, however sea lions can limit digestion rate and decrease it by at least 54%. This reduction in digestion results in a proportional reduction in oxygen use in the stomach and therefore a correlated oxygen supply for diving. Digestion rate in these sea lions increase back to normal rates immediately upon resurfacing. Oxygen depletion limits dive duration, but carbon dioxide (CO2) build up also plays a role in the dive capabilities of many marine mammals. After a sea lion returns from a long dive, CO2 is not expired as fast as oxygen is replenished in the blood, due to the unloading complications with CO2. However, having more than normal levels of CO2 in the blood does not seem to adversely affect dive behavior. Compared to terrestrial mammals, sea lions have a higher tolerance to storing CO2 which is what normally tells mammals that they need to breathe. This ability to ignore a response to CO2 is likely brought on by increase carotid bodies which are sensor for oxygen levels which let the animal know its available oxygen supply. Yet, the sea lions cannot avoid the effects of gradual CO2 build up which eventually causes the sea lions to spend more time at the surface after multiple repeated dives to allow for enough built up CO2 to be expired.
+
+
+Parasites and diseases
+Behavioural and environmental correlates of Philophthalmus zalophi, an eye parasite. And the infection has impacted the survival of juvenile Galapagos sea lions (Zalophus wollebaeki). This infection leads to diseases that are connected to global warming. The number of infectious stages of different parasites species has a strong correlation with temperature change, therefore it is essential to consider the correlation between the increasing number of parasitic infections and climate changes. To test this proposed theory researchers used Galapagos sea lions because they are endemic to the Galapagos islands. The Galapagos Islands goes through seasonal changes in sea surface temperatures, which consist of high temperatures from the beginning of January through the month of May and lower temperatures throughout the rest of the year. Parasites surfaced in large numbers when the sea temperature was at its highest. Furthermore, data was collected by capturing sea lions in order to measure and determine their growth rates. Their growth rates were noted along with the citings of parasites which were found under the eyelid. The shocking results were that sea lions are affected the parasites from the early ages of 3 weeks old up until the age of 4 to 8 months. The parasites found in the eye fluke did serious damage to the eye. From the data collected, 21 of the 91 survived; with a total of 70 deaths in just a span of two years. The parasites are attacking the pups at such young ages; thus causing the pups to not reach the age of reproduction. The death rates of the pups is surpassing the fertility rate by far. Since most pups are unable to reach the age of reproduction, the population is not growing fast enough to keep the species out of endangerment. The pups who do survive must pass their strong genes down to make sure their young survive and the generation that follows. Other parasites, like Anisakis and heartworm can also infect sea lions.
+Along with Galapagos islands, sea lions (Zalophus wollebaeki) being affected are the Australian sea lions (Neophoca cinerea). The same method was used for the sea pups on the galapagos island, but in addition, the researchers in Australia took blood samples. The pups in Australia were being affected by hookworms, but they were also coming out in large numbers with warmer temperatures. Sea pups in New Zealand (Phocarctos hookeri) were also affected really early ages by hookworms (Uncinaria). The difference is that in New Zealand researchers took the necessary steps and began treatment. The treatment seemed to be effective on the pups who have taken it. They found no traces of this infection afterwards. However, the percentage of pups who do have it is still relatively high at about 75%. Those pups who were treated had much better growth rates than those who did not. Overall parasites and hookworms are killing off enough pups to place them in endangerment. Parasites affect sea pups in various areas of the world. Reproductive success reduces immensely, survival methods, changes in health and growth have also been affected.
+
+
+Gene expressions and diet
+Diet is an important factor in the well-being of any animal’s life. Gene expressions are being used more often to detect the physiological responses to nutrition, as well as other stressors. In a study done with four Steller sea lions (Eumetopias jubatus), three of the four sea lions underwent a 70-day trial which consisted of unrestricted food intake, acute nutritional stress, and chronic nutritional stress. The results of this study showed that the sea lions with nutritional stress down-regulated some cellular processes within their immune response and oxidative stress. Sea lions get affected greatly due to environmental changes because of the dependency they have on marine resources for feeding. A reduced food supply leads to population decline. Compared to many other factors that contribute to an endangered species, nutritional stress is the most proximate cause to population decline.
+The New Zealand sea lion has the largest population, therefore no diet studies had ever been conducted. However, when a study was finally conducted the location and climate change effects it had on diet were discovered. North to south composition of a sea lion's diet showed that the temperature gradients were a key factor in the prey mix that was available for the NZ sea lions. Species that were from warmer water were less frequent when the southern population was studied. Therefore, because of the difference in diet because of climate change, sea lions rely on a steady non-changing weather change. However, when the weather changes drastically and unexpectedly then sea lions are left with no food.
+
+
+Geographic variation
+
+Geographic variation for sea lions have been determined by the observations of skulls of several Otariidae species; a general change in size corresponds with a change in latitude and primary productivity. Skulls of Australian sea lions from Western Australia were generally smaller in length whereas the largest skulls are from cool temperate localities. Otariidae are in the process of species divergence, much of which may be driven by local factors, particularly latitude and resources. Populations of a given species tend to be smaller in the tropics, increase in size with increasing latitude, and reach a maximum in sub-polar regions. In a cool climate and cold waters there should be a selective advantage in the relative reduction of body surface area resulting from increased size, since the metabolic rate is related more closely to body surface area than to body weight.
+
+
+Breeding and population
+
+
+Breeding methods and habits
+
+Sea lions, with three groups of pinnipeds, have multiple breeding methods and habits over their families but they remain relatively universal. Otariids, or eared sea lions, raise their young, mate, and rest in more earthly land or ice habitats. Their abundance and haul-out behavior have a direct effect on their on land breeding activity. Their seasonal abundance trend correlates with their breeding period between the austral summer of January to March. Their rookeries populate with newborn pups as well as male and female otariids that remain to defend their territories. At the end of the breeding period males disseminate for food and rest while females remain for nurturing. Other points in the year consist of a mix of ages and genders in the rookeries with haul-out patterns varying monthly.
+Steller sea lions, living an average of 15 to 20 years, begin their breeding season when adult males establish territories along the rookeries in early May. Male sea lions reach sexual maturity from ages 5 to 7 and don’t become territorial until around 9 to 13 years of age. The females arrive in late may bringing in an increase of territorial defense through fighting and boundary displays. After a week births consist most usually of one pup with a perinatal period of 3 to 13 days.
+Steller sea lions have exhibited multiple competitive strategies for reproductive success. Sea lion mating is often polygamous as males usually mate with different females to increase fitness and success, leaving some males to not find a mate at all. Polygamous males rarely provide parental care towards the pup. Strategies used to monopolize females include the resource-defense polygyny, or occupying important female resources. This involves occupying and defending a territory with resources or features attractive to females during sexually receptive periods. Some of these factors may include pupping habitat and access to water. Other techniques include potentially limiting access of other males to females.
+
+
+Population
+Otaria flavescens (South American sea lion) lives along the Chilean coast with a population estimate of 165,000. According to the most recent surveys in northern and southern Chile the sealing period of the middle twentieth century that left a significant decline in sea lion population is recovering. The recovery is associated with less hunting, otariids rapid population growth, legislation on nature reserves, and new food resources. Haul-out patterns change the abundance of sea lions at particular times of the day, month, and year. Patterns in migration relate to temperature, solar radiation, and prey and water resources. Studies of South American sea lions and other otariids document maximum population on land during early afternoon, potentially due to haul-out during high air temperatures. Adult and subadult males do not show clear annual patterns, maximum abundance being found from October to January. Females and their pups hauled-out during austral winter months of June to September.
+
+
+Interactions with humans
+
+South American sea lions have been greatly impacted by human exploitation. During the late Holocene period to the middle of the twentieth century, hunter gatherers along the Beagle Channel and northern Patagonia had greatly reduced the number of sea lions due to their exploiting and hunting of the species and of the species’ environment. Although sealing has been put to a halt in many countries, such as Uruguay, the sea lion population continues to decline because of the drastic effects humans have on their ecosystems. As a result, South American sea lions have been foraging at higher tropical altitudes than they did prior to human exploitation. Fishermen play a key role in the endangerment of sea lions. Sea lions rely on fish, like pollock, as a food source and have to compete with fishermen for it. When fishermen are successful at their job, they greatly reduce the sea lion’s food source, which in turn endangers the species. Also, human presence and human recreational activities can cause sea lions to engage in violent and aggressive actions. When humans come closer than 15 meters of a sea lion, the sea lions' vigilance increases because of the disturbance of humans. These disturbances can potentially cause sea lions to have psychological stress responses that cause the sea lions to retreat, sometimes even abandon their locations, and decreases the amount of time sea lions spend hauling out.
+
+Sea lion attacks on humans are rare, but when humans come within approximately 2.5 meters, it can be very unsafe. In a highly unusual attack in 2007 in Western Australia, a sea lion leapt from the water and seriously mauled a 13-year-old girl surfing behind a speedboat. The sea lion appeared to be preparing for a second attack when the girl was rescued. An Australian marine biologist suggested that the sea lion may have viewed the girl "like a rag doll toy" to be played with. In San Francisco, where an increasingly large population of California sea lions crowds docks along San Francisco Bay, incidents have been reported in recent years of swimmers being bitten on the legs by large, aggressive males, possibly as territorial acts. In April 2015, a sea lion attacked a 62-year-old man who was boating with his wife in San Diego. The attack left the man with a punctured bone.. In May 2017, a sea lion dragged a small girl by her dress into the water while she was sitting on a pier side around the time tourists in British Columbia were illegally feeding the sea lions. She was pulled out of the water with minor injuries and was getting antibiotic prophylactic treatment for seal finger infection from the superficial bite injury.
+Sea lions have also been the main focus of tourism in Australia and New Zealand. One of the main sites to view sea lions is in the Carnac Island Nature Reserve near Perth in Western Australia. This tourist site receives over 100,000 visitors, many of whom are recreational boaters and tourists, who can watch the male sea lions haul out on to the shore. They have sometimes been called "the unofficial welcoming committee of the Galápagos Islands".
+
+
+In popular culture
+The 1994 film Andre features a sea lion named Andre.
+The 2016 film Finding Dory features Fluke, Rudder and Gerald who are sea lions.
+A 2014 comic by Wondermark featured a talking sea lion confronting a human he overheard saying she hated sea lions. The sea lion follows her and her companion home, continually asking for an explanation. The comic went viral and spawned the term "sea lioning"- repeatedly asking for an explanation (assumedly in bad faith) of previous comments.  
+
+
+Gallery
+
+
+See also
+California sea lion
+Marine mammal
+List of carnivorans by population
+Otariids
+Pinniped
+
+
+References
+
+
+Further reading
+Healy, Jack (March 2015). Starving Sea Lions Washing Ashore by the Hundreds in California. The New York Times
