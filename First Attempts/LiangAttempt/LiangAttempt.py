@@ -8,6 +8,8 @@ if __name__ == '__main__':
     testIn = sys.argv[2]
     train = open(trainIn,"r").read()
     test = open(testIn,"r").read()
+    train = train.lower()
+    test = test.lower()
 
     train = re.sub(r"[\s\n\t]+"," ",train)
     test = re.sub(r"[\s\n\t]+"," ",test)
@@ -28,6 +30,6 @@ if __name__ == '__main__':
 
     model = word2vec.Word2Vec(train, min_count = 1)
 
-    print(model.wv.most_similar(['Indus',"Valley"]))
+    print(model.wv.most_similar(["eastward"]))
 
 
