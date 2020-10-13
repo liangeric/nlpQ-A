@@ -1,0 +1,18 @@
+VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray
+sentences = np.array(sentences)[idx_sort]
+Speed : 29.4 sentences/s (cpu mode, bsize=128)
+nb sentences encoded : 71
+Nb words kept : 30/32 (93.8%)
+Speed : 14.5 sentences/s (cpu mode, bsize=128)
+nb sentences encoded : 71
+(3, 4096)
+(71,)
+Question: Who was the first Pharaoh of the Old Kingdom?
+Answer:
+Third Dynasty
+
+The first Pharaoh of the Old Kingdom was Djoser (sometime between 2691 and 2625 BC) of the third dynasty, who ordered the construction ofa pyramid (the Step Pyramid) in Memphis' necropolis, Saqqara.
+(71,)
+Question: Who perfected the art of carving intricate relief decoration
+Answer:
+They perfected the art of carving intricate relief decoration and, through keen observation of the natural world, produced detailed images of animals, plants, and even landscapes, recording the essential elements of their world for eternity in scenes painted and carved on the walls of temples and tombs.
