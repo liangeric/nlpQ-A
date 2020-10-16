@@ -32,11 +32,16 @@ def NLTKWorkFlow(txtFP):
 # Also needs to download and install a specific model i  think
 # python -m spacy download en_core_web_sm
 def spaCyWorkflow(txtFP, qFP):
+    # Loads a model that you should have downloaded and installed 
+    # Created a SpaCy doc object if called onto a string
     nlp = spacy.load("en_core_web_sm")
+
     with open(txtFP, "r+") as f:
         txt_doc = nlp(f.read())
+        # This is a very large object since it now holds the whole text
     with open(qFP, "r+") as f:
         question_doc = nlp(f.read())
+    # You can loop through the Doc object as below and pull out POS/Dep/ etc. 
     for token in question_doc:
         print(token.text, token.pos_, token.dep_)
 
