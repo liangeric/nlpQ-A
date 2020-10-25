@@ -1,0 +1,6 @@
+name: nlp_qa
+channels:
+  - defaults
+dependencies:
+  - python=3.8.2
+  - numpy
