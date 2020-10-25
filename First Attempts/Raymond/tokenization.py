@@ -48,7 +48,7 @@ def spaCyWorkflow(txtFP, qFP):
 if __name__ == "__main__":
     text = "Development_data/set1/a1.txt"
     questions = "q.txt"
-    NLTKWorkFlow(text)
+    # NLTKWorkFlow(text)
     
     # _______________________________
     # Now SpaCy 
