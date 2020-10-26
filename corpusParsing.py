@@ -18,7 +18,9 @@ if __name__ == '__main__':
     corpus = re.sub(r"[\n]+","\n",corpus)
 
     # convert periods with a bunch of spaces/newlines/tabs after to just a period
-    corpus = re.sub(r"\.([\s\n\t]+)",".",corpus)
+    # however does not convert if the period and spaces/newlines/tabs is followed by the ) character
+    # this helps not filter out cases where the sentence is like (c. 2686-2181 BC)
+    corpus = re.sub(r"\.([\s\n\t]+)(?![^\.\(]*\))",".",corpus)
 
     # convert the new lines into periods
     corpus = re.sub(r"[\n]+",".",corpus)
@@ -27,12 +29,14 @@ if __name__ == '__main__':
     corpus = re.sub(r"[\s\t]+"," ",corpus)
 
     # convert corpus into a vector of sentences and create another copy for word vector later
-    corpSen = corpus.split(".")
-    corpWords = corpus.split(".")
+    # however does not split if the period is followed by a space and then the ) character
+    # this helps not split on cases where the sentence is like (c. 2686-2181 BC)
+    corpSen = re.split(r"\.(?! [^\.\(]*\))",corpus)
+    corpWords = re.split(r"\.(?! [^\.\(]*\))",corpus)
 
     # convert each vector of sentences into vector of words
     for i in range(len(corpWords)):
     	corpWords[i] = corpWords[i].split(" ")
 
-    print(corpWords[0])
+    print(corpSen[1])
 
