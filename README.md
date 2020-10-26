@@ -18,7 +18,7 @@ Create the conda environment `conda env create --file environment.yml`
 - Show all your conda env `conda env list`
 - Show dependencies (libraries) in current conda env `conda list`
 - Activate conda env `conda activate nlp_qa`
-- Deactivate conda env `conda deactivate nlp_qa`
+- Deactivate conda env `conda deactivate`
 - Remove conda env `conda env remove -n nlp_qa`
 
 Be sure you are always operating in the same conda environment.
