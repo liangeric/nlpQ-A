@@ -2,6 +2,8 @@
 
 This is a NLP project that is a Question and Answer system created by Eric Liang, Samarth Gowda, Melissa Yang, and Raymond Yang.
 
+Click [here](https://youtu.be/kg2jUaCN7gA) to see our progress report/project overview.
+
 ### Create Conda Environment
 
 Create the conda environment `conda env create --file environment.yml`
