@@ -35,6 +35,7 @@ if __name__ == '__main__':
     corpWords = re.split(r"\.(?! [^\.\(]*\))",corpus)
 
     # convert each vector of sentences into vector of words
+    # result is a vector of vectors
     for i in range(len(corpWords)):
     	corpWords[i] = corpWords[i].split(" ")
 
