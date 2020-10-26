@@ -2,6 +2,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords  #  Need to separately download this 
 from nltk.stem import WordNetLemmatizer # Also need separate download
 import spacy
+from spacy import displacy
 
 def NLTKWorkFlow(txtFP):
     with open(txtFP, "r+") as f:
@@ -42,8 +43,12 @@ def spaCyWorkflow(txtFP, qFP):
     with open(qFP, "r+") as f:
         question_doc = nlp(f.read())
     # You can loop through the Doc object as below and pull out POS/Dep/ etc. 
-    for token in question_doc:
-        print(token.text, token.pos_, token.dep_)
+    # for token in question_doc:
+    #     print(token.text, token.pos_, token.dep_)
+    for chunk in question_doc.noun_chunks:
+    print(chunk.text, chunk.root.text, chunk.root.dep_,
+            chunk.root.head.text)
+    displacy.serve(question_doc, style="dep")
 
 if __name__ == "__main__":
     text = "Development_data/set1/a1.txt"
