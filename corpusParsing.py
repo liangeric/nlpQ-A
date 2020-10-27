@@ -10,6 +10,7 @@ if __name__ == '__main__':
 	# takes in corpus text and reads it in as a string
     corpusIn = sys.argv[1]
     corpus = open(corpusIn,"r").read()
+    corpus = corpus.strip()
 
     # convert to lower case, might not want to do this for parsing later
     # corpus = corpus.lower()
@@ -32,12 +33,15 @@ if __name__ == '__main__':
     # however does not split if the period is followed by a space and then the ) character
     # this helps not split on cases where the sentence is like (c. 2686-2181 BC)
     corpSen = re.split(r"\.(?! [^\.\(]*\))",corpus)
-    corpWords = re.split(r"\.(?! [^\.\(]*\))",corpus)
+    #corpWords = re.split(r"\.(?! [^\.\(]*\))",corpus)
 
     # convert each vector of sentences into vector of words
     # result is a vector of vectors
-    for i in range(len(corpWords)):
-    	corpWords[i] = corpWords[i].split(" ")
+    #for i in range(len(corpWords)):
+    #	corpWords[i] = corpWords[i].split(" ")
 
     print(corpSen[1])
+
+    # We are including references at bottom of each wiki corpus, this is something we may want to remove in the future
+    # if it affects our algorithm later
 
