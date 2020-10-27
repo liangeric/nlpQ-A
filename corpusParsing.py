@@ -7,6 +7,7 @@ import sys
 import nltk
 
 nltk.download('punkt')
+nltk.download('stopwords')
 
 if __name__ == '__main__':
 
@@ -46,7 +47,16 @@ if __name__ == '__main__':
     # Use nltk to split sentences after cleaning
     corpSen = nltk.sent_tokenize(corpus)
 
-    print(corpSen)
+    # Get all the stopping words from nltk and filter them out of each sentence, then recombine
+    stop_words = set(nltk.corpus.stopwords.words("english"))
+    filteredSen = []
+    for sen in corpSen:
+        sen = nltk.tokenize.word_tokenize(sen)
+        sen = [w for w in sen if not w in stop_words]
+        sen = " ".join(sen)
+        filteredSen.append(sen)
+
+    print(filteredSen)
 
     # We are including references at bottom of each wiki corpus, this is something we may want to remove in the future
     # if it affects our algorithm later
