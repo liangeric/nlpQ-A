@@ -27,8 +27,13 @@ if __name__ == '__main__':
     # this helps not filter out cases where the sentence is like (c. 2686-2181 BC)
     #corpus = re.sub(r"\.([\s\n\t]+)(?![^\.\(]*\))",".",corpus)
 
-    # convert the new lines into periods
-    corpus = re.sub(r"[\n]+",". ",corpus)
+    # remove headers (assuming header's don't have periods, question marks, or exclamation marks)
+    corpus = corpus.split("\n")
+    corpus = [x for x in corpus if "." in x or "?" in x or "!" in x]
+    corpus = " ".join(corpus)
+
+    # convert the new lines into space
+    corpus = re.sub(r"[\n]+"," ",corpus)
 
     # convert the spaces and tabs into single space
     corpus = re.sub(r"[\s\t]+"," ",corpus)
