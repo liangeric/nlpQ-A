@@ -11,16 +11,16 @@ nltk.download('stopwords')
 
 if __name__ == '__main__':
 
-	# takes in corpus text and reads it in as a string
+    # takes in corpus text and reads it in as a string
     corpusIn = sys.argv[1]
-    corpus = open(corpusIn,"r").read()
+    corpus = open(corpusIn, "r").read()
     corpus = corpus.strip()
 
     # convert to lower case, might not want to do this for parsing later
     # corpus = corpus.lower()
 
     # convert multiple new lines into a single new line
-    corpus = re.sub(r"[\n]+","\n",corpus)
+    corpus = re.sub(r"[\n]+", "\n", corpus)
 
     # convert periods with a bunch of spaces/newlines/tabs after to just a period
     # however does not convert if the period and spaces/newlines/tabs is followed by the ) character
@@ -33,10 +33,10 @@ if __name__ == '__main__':
     corpus = " ".join(corpus)
 
     # convert the new lines into space
-    corpus = re.sub(r"[\n]+"," ",corpus)
+    corpus = re.sub(r"[\n]+", " ", corpus)
 
     # convert the spaces and tabs into single space
-    corpus = re.sub(r"[\s\t]+"," ",corpus)
+    corpus = re.sub(r"[\s\t]+", " ", corpus)
 
     # convert corpus into a vector of sentences and create another copy for word vector later
     # however does not split if the period is followed by a space and then the ) character
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     # convert each vector of sentences into vector of words
     # result is a vector of vectors
-    #for i in range(len(corpWords)):
+    # for i in range(len(corpWords)):
     #	corpWords[i] = corpWords[i].split(" ")
 
     # Use nltk to split sentences after cleaning
@@ -65,4 +65,3 @@ if __name__ == '__main__':
 
     # We are including references at bottom of each wiki corpus, this is something we may want to remove in the future
     # if it affects our algorithm later
-
