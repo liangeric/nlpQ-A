@@ -8,7 +8,7 @@ from parse import Parse
 import sys
 import spacy
 import numpy as np
-
+import re
 
 def cosine(u, v):
     return np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
@@ -28,6 +28,8 @@ class Answer:
         p = Parse()
 
         self.corpus = p.parseCorpus(self.article)
+
+        self.questions = re.sub(r"[\n]+", " ", self.questions)
 
         self.spacyCorpus = self.nlp(self.corpus)
         self.spacyQuestions = self.nlp(self.questions)
@@ -70,6 +72,7 @@ class Answer:
 
             print("Question:", list(self.spacyQuestions.sents)[i])
             print("Answer:", list(self.spacyCorpus.sents)[np.argmax(cos)])
+            print("")
 
     def categorize(self):
         pass
