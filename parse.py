@@ -3,7 +3,6 @@ Class that takes care of parsing any necessary files
 '''
 
 import re
-import nltk
 
 
 class Parse:
