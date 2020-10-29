@@ -5,6 +5,7 @@ Python command: python answer.py article.txt questions.txt
 '''
 
 from parse import Parse
+from sentence_transformers import SentenceTransformer # Pip installed
 import sys
 import spacy
 import numpy as np
@@ -46,7 +47,7 @@ class Answer:
         """
         avg = []
         for sentence in doc.sents:
-            accum = np.zeros((300,))
+            accum = np.zeros((300,))  # This value is hardcoded from the Spacy Word2Vec model
             for word in sentence:
 
                 # if given excludeTokens, skip word if it's in excludeTokens
@@ -60,12 +61,46 @@ class Answer:
 
         return avg
 
+    def getSentenceVector(self, doc, excludeTokens=None):
+        """[get the sentence vector for a given doc]
+
+        Args:
+            doc ([spacy]): [spacy model from text]
+            excludeTokens ([set], optional): [tokens to exclude]. Defaults to None.
+
+        Returns:
+            [list]: list of Numpy Arrays of Sentence vector
+        """
+        # This is the only model I tried. First time running should cause a download but afterwards it doesnt download.
+        model = SentenceTransformer('distilbert-base-nli-mean-tokens')
+
+        # Gonna build the question without question words and '?'
+        sentences = []
+        for sentence in doc.sents:
+            parsedSentence = []
+            for word in sentence:
+
+                # if given excludeTokens, skip word if it's in excludeTokens
+                if excludeTokens is not None and word in excludeTokens:
+                    continue
+
+                # I dont want to remove stopping since we are looking at the sentence level now
+                parsedSentence.append(word.text)
+
+            sentences.append(" ".join(parsedSentence)) # Now we join all of the word back together 
+
+        # Takes in a list of strings, careful to feed in string and not spacy objects
+        # Returns a list of numpy arrays
+        sentence_embeddings = model.encode(sentences) 
+        # assert(len(sentence_embeddings) == len(list(doc.sents)))
+        return sentence_embeddings
+
     def similarity(self):
 
         excludeTokens = set(["WHO", "WHAT", "WHEN", "WHERE", "HOW", "?"])
 
-        qs = self.getAverageVector(self.spacyQuestions, excludeTokens)
-        cs = self.getAverageVector(self.spacyCorpus)
+        qs = self.getSentenceVector(self.spacyQuestions, excludeTokens)
+        cs = self.getSentenceVector(self.spacyCorpus)
 
         for i in range(len(qs)):
             cos = np.apply_along_axis(cosine, 1, cs, qs[i])
