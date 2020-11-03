@@ -16,12 +16,16 @@ def cosine(u, v):
     return np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
 
 # Should be vectorized eventually. this is kinda a zzz 
+# using 1 - jaccardSim bc it's weird like that (:
 def jaccardSim(u,v):
     minSum, maxSum = 0, 0
     for i in range(len(u)):
         minSum += min([u[i], v[i]])
         maxSum += max([u[i], v[i]])
     return 1 - minSum/maxSum
+
+def scipyJaccard(u, v):
+    return 1 - distance.jaccard(u, v)
 
 class Answer:
     def __init__(self, article, questions):
@@ -116,9 +120,9 @@ class Answer:
             print("Question:", list(self.spacyQuestions.sents)[i])
 
             #print("Answer:", list(self.spacyCorpus.sents)[np.argmax(cos)])
-            ind = np.argpartition(dists, -3)[-3:]
-            for i in ind:
-                print("Answer:", list(self.spacyCorpus.sents)[i])
+            ind = dists.argsort()[-3:][::-1] # we might want to look at numbers later?
+            for j in range(3):
+                print("Answer", j, ":", list(self.spacyCorpus.sents)[ind[j]])
             print("")
 
     def categorize(self):
@@ -137,4 +141,11 @@ if __name__ == "__main__":
     answer = Answer(article, questions)
     answer.preprocess()
     answer.similarity(distFunc  = jaccardSim)
-    # print(jaccardSim([1,2,3], [4,5,6]))
+    # a = [1.5, 3.45, 5, 0, 23]
+    # b = [342, 1, 3, 1000, 3.9]
+    # c = [1.5, 3.45, 5, 0, 23]
+    # print(1 - scipyJaccard(a, b))
+    # print(jaccardSim(a, b))
+
+    # print(1 - scipyJaccard(a, c))
+    # print(jaccardSim(a, c))
