@@ -106,7 +106,11 @@ class Answer:
             cos = np.apply_along_axis(cosine, 1, cs, qs[i])
 
             print("Question:", list(self.spacyQuestions.sents)[i])
-            print("Answer:", list(self.spacyCorpus.sents)[np.argmax(cos)])
+
+            #print("Answer:", list(self.spacyCorpus.sents)[np.argmax(cos)])
+            ind = np.argpartition(cos, -3)[-3:]
+            for i in ind:
+                print("Answer:", list(self.spacyCorpus.sents)[i])
             print("")
 
     def categorize(self):
