@@ -10,10 +10,18 @@ import sys
 import spacy
 import numpy as np
 import re
+from scipy.spatial import distance
 
 def cosine(u, v):
     return np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
 
+# Should be vectorized eventually. this is kinda a zzz 
+def jaccardSim(u,v):
+    minSum, maxSum = 0, 0
+    for i in range(len(u)):
+        minSum += min([u[i], v[i]])
+        maxSum += max([u[i], v[i]])
+    return 1 - minSum/maxSum
 
 class Answer:
     def __init__(self, article, questions):
@@ -95,7 +103,7 @@ class Answer:
         # assert(len(sentence_embeddings) == len(list(doc.sents)))
         return sentence_embeddings
 
-    def similarity(self):
+    def similarity(self, distFunc=cosine):
 
         excludeTokens = set(["WHO", "WHAT", "WHEN", "WHERE", "HOW", "?"])
 
@@ -103,12 +111,12 @@ class Answer:
         cs = self.getSentenceVector(self.spacyCorpus)
 
         for i in range(len(qs)):
-            cos = np.apply_along_axis(cosine, 1, cs, qs[i])
+            dists = np.apply_along_axis(distFunc, 1, cs, qs[i])
 
             print("Question:", list(self.spacyQuestions.sents)[i])
 
             #print("Answer:", list(self.spacyCorpus.sents)[np.argmax(cos)])
-            ind = np.argpartition(cos, -3)[-3:]
+            ind = np.argpartition(dists, -3)[-3:]
             for i in ind:
                 print("Answer:", list(self.spacyCorpus.sents)[i])
             print("")
@@ -128,4 +136,5 @@ if __name__ == "__main__":
 
     answer = Answer(article, questions)
     answer.preprocess()
-    answer.similarity()
+    answer.similarity(distFunc  = jaccardSim)
+    # print(jaccardSim([1,2,3], [4,5,6]))
