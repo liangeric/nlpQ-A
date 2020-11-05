@@ -13,16 +13,17 @@ BINARY = "BINARY"
 
 
 class Question:
-    def __init__(self, question, question_type, question_sentence):
+    def __init__(self):
         # [string] raw question
-        self.question = question
+        self.raw_question = None
 
         # [string] type of question i.e. WHO, BINARY, etc.
-        self.question_type = question_type
+        self.question_type = None
 
         # [string] sentence without question_type i.e WHO, WHAT, etc.
-        self.question_sentence = question_sentence
-
+        self.parsed_question = None
+        self.sent_vector = None  # sent2vec on the parsed questions
+        self.spacyDoc = None
 
 class QuestionProcess:
     def __init__(self):
@@ -69,8 +70,8 @@ class QuestionProcess:
 
 
 # sample code for demonstration purposes
-
-# QP = QuestionProcess()
-# questions = QP.process_questions("./q.txt")
-# for q in questions:
-#     print(q.question, q.question_type, q.question_sentence)
+if __name__ == "__main__":
+    QP = QuestionProcess()
+    questions = QP.process_questions("q.txt")
+    for q in questions:
+        print(q.raw_question, q.question_type, q.parsed_question)

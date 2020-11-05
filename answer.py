@@ -11,18 +11,9 @@ import spacy
 import numpy as np
 import re
 from scipy.spatial import distance
+from distUtils import jaccardSim, cosine, diceSim
+from question import  Question
 
-def cosine(u, v):
-    return np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
-
-# Should be vectorized eventually. this is kinda a zzz 
-# using 1 - jaccardSim bc it's weird like that (:
-def jaccardSim(u,v):
-    minSum, maxSum = 0, 0
-    for i in range(len(u)):
-        minSum += min([u[i], v[i]])
-        maxSum += max([u[i], v[i]])
-    return 1 - minSum/maxSum
 
 def scipyJaccard(u, v):
     return 1 - distance.jaccard(u, v)
@@ -43,10 +34,11 @@ class Answer:
         self.corpus = p.parseCorpus(self.article)
 
         self.questions = re.sub(r"[\n]+", " ", self.questions)
-
+        # print(self.questions)
         self.spacyCorpus = self.nlp(self.corpus)
-        self.spacyQuestions = self.nlp(self.questions)
+        # self.spacyQuestions = self.nlp(self.questions)
 
+    # depreciated
     def getAverageVector(self, doc, excludeTokens=None):
         """[get the average vectors for a given doc]
 
@@ -73,13 +65,59 @@ class Answer:
 
         return avg
 
-    def getSentenceVector(self, doc, excludeTokens=None):
+    def questionProcessing(self, excludeTokens=None):
         """[get the sentence vector for a given doc]
 
         Args:
             doc ([spacy]): [spacy model from text]
             excludeTokens ([set], optional): [tokens to exclude]. Defaults to None.
 
+        Returns:
+            [list]: list of Numpy Arrays of Sentence vector
+        """
+        # This is the only model I tried. First time running should cause a download but afterwards it doesnt download.
+        model = SentenceTransformer('distilbert-base-nli-mean-tokens')
+
+        # if excludeTokens is None:
+        #     sentence_embeddings = model.encode(sentences) 
+        #     return sentence_embeddings
+        # Gonna build the question without question words and '?'
+        sentences = []
+        for sentence in self.questions.split("?"):
+            # print(sentence)
+            parsedSentence = []
+            question = Question()
+            question.raw_question = sentence + "?"
+            question.spacyDoc = self.nlp(sentence)
+            for word in sentence.split(" "):
+                # if given excludeTokens, skip word if it's in excludeTokens
+                if word.upper() in excludeTokens:
+                    # if word == "?":
+                    #     continue
+                    question.question_type = word.upper()
+                    continue
+                # question.question_type = "Other"
+                # I dont want to remove stopping since we are looking at the sentence level now
+                parsedSentence.append(word)
+            
+            question.parsed_question  = " ".join(parsedSentence)
+            print(question.parsed_question)
+            # going to store this in  a list just  in case it wants 2d inputs only
+            question.sent_vector = model.encode(question.parsed_question)  
+            
+            sentences.append(question) # Now we join all of the word back together 
+
+        # Takes in a list of strings, careful to feed in string and not spacy objects
+        # Returns a list of numpy arrays
+        # sentence_embeddings = model.encode(sentences) 
+        # assert(len(sentence_embeddings) == len(list(doc.sents)))
+        return sentences
+
+    def getSentenceVector(self, doc, excludeTokens=None):
+        """[get the sentence vector for a given doc]
+        Args:
+            doc ([spacy]): [spacy model from text]
+            excludeTokens ([set], optional): [tokens to exclude]. Defaults to None.
         Returns:
             [list]: list of Numpy Arrays of Sentence vector
         """
@@ -107,17 +145,18 @@ class Answer:
         # assert(len(sentence_embeddings) == len(list(doc.sents)))
         return sentence_embeddings
 
+
     def similarity(self, distFunc=cosine):
 
         excludeTokens = set(["WHO", "WHAT", "WHEN", "WHERE", "HOW", "?"])
 
-        qs = self.getSentenceVector(self.spacyQuestions, excludeTokens)
+        qs = self.questionProcessing(excludeTokens)
         cs = self.getSentenceVector(self.spacyCorpus)
 
         for i in range(len(qs)):
-            dists = np.apply_along_axis(distFunc, 1, cs, qs[i])
+            dists = np.apply_along_axis(distFunc, 1, cs, qs[i].sent_vector)
 
-            print("Question:", list(self.spacyQuestions.sents)[i])
+            print("Question:", qs[i].raw_question)
 
             #print("Answer:", list(self.spacyCorpus.sents)[np.argmax(cos)])
             ind = dists.argsort()[-3:][::-1] # we might want to look at numbers later?
