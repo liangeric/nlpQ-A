@@ -82,38 +82,38 @@ class Answer:
         #     sentence_embeddings = model.encode(sentences) 
         #     return sentence_embeddings
         # Gonna build the question without question words and '?'
-        sentences = []
-        for sentence in self.questions.split("?"):
+        parsedQuestions = []
+        for question in self.questions.split("?"):
             # print(sentence)
-            parsedSentence = []
-            question = Question()
-            question.raw_question = sentence + "?"
-            question.spacyDoc = self.nlp(sentence)
-            for word in sentence.split(" "):
+            parsedWords = []
+            newQuestion = Question()
+            newQuestion.raw_question = question + "?"
+            newQuestion.spacyDoc = self.nlp(question)
+            for word in question.split(" "):
                 # if given excludeTokens, skip word if it's in excludeTokens
                 if word.upper() in excludeTokens:
                     # if word == "?":
                     #     continue
-                    question.question_type = word.upper()
+                    newQuestion.question_type = word.upper()
                     continue
                 # question.question_type = "Other"
                 # I dont want to remove stopping since we are looking at the sentence level now
-                parsedSentence.append(word)
+                parsedWords.append(word)
             
-            question.parsed_question  = " ".join(parsedSentence)
-            print(question.parsed_question)
+            newQuestion.parsed_version  = " ".join(parsedWords)
+            print(newQuestion.parsed_version)
             # going to store this in  a list just  in case it wants 2d inputs only
-            question.sent_vector = model.encode(question.parsed_question)  
+            newQuestion.sent_vector = model.encode(newQuestion.parsed_version)  
             
-            sentences.append(question) # Now we join all of the word back together 
+            parsedQuestions.append(newQuestion) # Now we join all of the word back together 
 
         # Takes in a list of strings, careful to feed in string and not spacy objects
         # Returns a list of numpy arrays
         # sentence_embeddings = model.encode(sentences) 
         # assert(len(sentence_embeddings) == len(list(doc.sents)))
-        return sentences
+        return parsedQuestions
 
-    def getSentenceVector(self, doc, excludeTokens=None):
+    def corpusVector(self, doc, excludeTokens=None):
         """[get the sentence vector for a given doc]
         Args:
             doc ([spacy]): [spacy model from text]
@@ -151,7 +151,7 @@ class Answer:
         excludeTokens = set(["WHO", "WHAT", "WHEN", "WHERE", "HOW", "?"])
 
         qs = self.questionProcessing(excludeTokens)
-        cs = self.getSentenceVector(self.spacyCorpus)
+        cs = self.corpusVector(self.spacyCorpus)
 
         for i in range(len(qs)):
             dists = np.apply_along_axis(distFunc, 1, cs, qs[i].sent_vector)

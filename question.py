@@ -21,7 +21,7 @@ class Question:
         self.question_type = None
 
         # [string] sentence without question_type i.e WHO, WHAT, etc.
-        self.parsed_question = None
+        self.parsed_version = None
         self.sent_vector = None  # sent2vec on the parsed questions
         self.spacyDoc = None
 
@@ -74,4 +74,4 @@ if __name__ == "__main__":
     QP = QuestionProcess()
     questions = QP.process_questions("q.txt")
     for q in questions:
-        print(q.raw_question, q.question_type, q.parsed_question)
+        print(q.raw_question, q.question_type, q.parsed_version)
