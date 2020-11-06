@@ -89,7 +89,7 @@ class Answer:
         # Since we are only looking at questions, we can split on '?'
         for question in self.questions.split("?"):
             # If the sentence is all whitespace go next, mostly for blank end lines
-            if question.isspace():
+            if question.isspace() or len(question) == 0:
                 continue
             # Initialize Question Class Object, and start storing information
             parsedQ, newQuestion = [], Question()
@@ -153,30 +153,37 @@ class Answer:
     def similarity(self, distFunc=cosine, k=3):
         """
         Runs the input distance function on all of the questions and compares with the corpus.
-        Prints out the top k sentence matches
+        Add in the corpus spacy objects into the .anwsers attribute
         Args:
             distFunc [function]: func for the similarity, defaults to cosine. 
-            k [int]: top k answer sentences to print with the question
+            k [int]: top k answer sentences
         Returns:
-            None
+            [Question Objects]: list of the question objects
         """
 
         qWords = set([WHAT, WHEN, WHO, WHERE, WHY, HOW, WHICH])
 
+        # Run the processing to return back a list of question objects
         qs = self.questionProcessing(qWords)
+
+        # Run corpus parsing, with the spacy doc object. Return a 2D numpy array, (numSents, len(sentVec))
         cs = self.corpusVector(self.spacyCorpus)
 
+        # For every question
         for i in range(len(qs)):
+            
+            # Apply the dist similarity function down the numpy array of the corpuss
             dists = np.apply_along_axis(distFunc, 1, cs, qs[i].sent_vector)
-
-            print("Question:", qs[i].raw_question, "Type: {}".format(qs[i].question_type))
-
-            #print("Answer:", list(self.spacyCorpus.sents)[np.argmax(cos)])
+            
+            # sorting for top k
             ind = dists.argsort()[-k:][::-1] # we might want to look at numbers later?
             for j in range(k):
-                print("Answer", j, ":", list(self.spacyCorpus.sents)[ind[j]])
-            print("\n")
-
+                spacyCorpusList = list(self.spacyCorpus.sents)
+                
+                # Add this answer to question object
+                qs[i].answers.append(spacyCorpusList[ind[j]])
+        return qs
+        
     def answerQuestion(self, question, sentence):
         pass
 
@@ -189,7 +196,15 @@ if __name__ == "__main__":
 
     answer = Answer(article, questions)
     answer.preprocess()
-    answer.similarity(distFunc  = jaccardSim)
+    qsObjLst = answer.similarity(distFunc=jaccardSim)
+    for qObj in qsObjLst:
+        print("Question: {} TYPE: {}".format(qObj.raw_question, qObj.question_type))
+        print("Named Entity: {}".format([ent for ent in qObj.spacyDoc.ents]), "\n")
+        for i in range(len(qObj.answers)):
+            print("Answer {}: {}".format(i, qObj.answers[i]))
+            print("Named Entities: {}".format([ent for ent in qObj.answers[i].ents]), "\n")
+        print("\n")
+
     # a = [1.5, 3.45, 5, 0, 23]
     # b = [342, 1, 3, 1000, 3.9]
     # c = [1.5, 3.45, 5, 0, 23]

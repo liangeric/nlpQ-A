@@ -24,6 +24,8 @@ class Question:
         self.parsed_version = None
         self.sent_vector = None  # sent2vec on the parsed questions
         self.spacyDoc = None
+        # list of top-k answer sentences, in the format of a spacy sent objects
+        self.answers = [] 
 
 class QuestionProcess:
     def __init__(self):
