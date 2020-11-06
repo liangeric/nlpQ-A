@@ -4,19 +4,27 @@ Command: ./answer article.txt questions.txt
 Python command: python answer.py article.txt questions.txt
 '''
 
-from parse import Parse
-from sentence_transformers import SentenceTransformer # Pip installed
-import sys
-import spacy
-import numpy as np
 import re
-from scipy.spatial import distance
-from distUtils import jaccardSim, cosine, diceSim
-from question import  Question
+import sys
+
+import numpy as np
+import spacy
+from sentence_transformers import SentenceTransformer  # Pip installed
+
+from distUtils import cosine, diceSim, jaccardSim, scipyJaccard
+from parse import Parse
+from question import Question
+
+WHAT = "WHAT"
+WHEN = "WHEN"
+WHO = "WHO"
+WHERE = "WHERE"
+WHY = "WHY"
+HOW = "HOW"
+WHICH = "WHICH"
+BINARY = "BINARY"
 
 
-def scipyJaccard(u, v):
-    return 1 - distance.jaccard(u, v)
 
 class Answer:
     def __init__(self, article, questions):
@@ -65,52 +73,48 @@ class Answer:
 
         return avg
 
-    def questionProcessing(self, excludeTokens=None):
-        """[get the sentence vector for a given doc]
+    def questionProcessing(self, qWords=None):
+        """ Specialized parsing for the questions. 
 
         Args:
-            doc ([spacy]): [spacy model from text]
-            excludeTokens ([set], optional): [tokens to exclude]. Defaults to None.
+            qWords ([set]): [question words, "WHO", "WHAT", ...]
 
         Returns:
-            [list]: list of Numpy Arrays of Sentence vector
+            [list]: list of Question Object, each stores info on the question: type, vec, raw, parsed
         """
         # This is the only model I tried. First time running should cause a download but afterwards it doesnt download.
         model = SentenceTransformer('distilbert-base-nli-mean-tokens')
-
-        # if excludeTokens is None:
-        #     sentence_embeddings = model.encode(sentences) 
-        #     return sentence_embeddings
-        # Gonna build the question without question words and '?'
         parsedQuestions = []
+
+        # Since we are only looking at questions, we can split on '?'
         for question in self.questions.split("?"):
-            # print(sentence)
-            parsedWords = []
-            newQuestion = Question()
-            newQuestion.raw_question = question + "?"
-            newQuestion.spacyDoc = self.nlp(question)
+            # If the sentence is all whitespace go next, mostly for blank end lines
+            if question.isspace():
+                continue
+            # Initialize Question Class Object, and start storing information
+            parsedQ, newQuestion = [], Question()
+            newQuestion.raw_question = question + "?"  # adding it back, since we split on it
+            newQuestion.spacyDoc = self.nlp(question)  # Create the spacy doc on this single question
+
+            # Remove the question word, categorize the question, and get its vector with sentence Transformer
             for word in question.split(" "):
-                # if given excludeTokens, skip word if it's in excludeTokens
-                if word.upper() in excludeTokens:
-                    # if word == "?":
-                    #     continue
+
+                # If word in qWords, we have found the question class, and dont add to parsedQ
+                # This does not solve the issues with 'can you repeat what elmo said?' 
+                if word.upper() in qWords:
                     newQuestion.question_type = word.upper()
                     continue
-                # question.question_type = "Other"
-                # I dont want to remove stopping since we are looking at the sentence level now
-                parsedWords.append(word)
+                parsedQ.append(word)
             
-            newQuestion.parsed_version  = " ".join(parsedWords)
-            print(newQuestion.parsed_version)
-            # going to store this in  a list just  in case it wants 2d inputs only
-            newQuestion.sent_vector = model.encode(newQuestion.parsed_version)  
-            
-            parsedQuestions.append(newQuestion) # Now we join all of the word back together 
+            # If the question_type was not set, it means lacks a question word, therefore should be Binary/other
+            if newQuestion.question_type is None:
+                newQuestion.question_type = BINARY
+            newQuestion.parsed_version  = " ".join(parsedQ)  # Now we join all of the word back together 
+            # print(newQuestion.parsed_version)
 
-        # Takes in a list of strings, careful to feed in string and not spacy objects
-        # Returns a list of numpy arrays
-        # sentence_embeddings = model.encode(sentences) 
-        # assert(len(sentence_embeddings) == len(list(doc.sents)))
+            newQuestion.sent_vector = model.encode(newQuestion.parsed_version)  
+            parsedQuestions.append(newQuestion) 
+
         return parsedQuestions
 
     def corpusVector(self, doc, excludeTokens=None):
@@ -146,26 +150,32 @@ class Answer:
         return sentence_embeddings
 
 
-    def similarity(self, distFunc=cosine):
+    def similarity(self, distFunc=cosine, k=3):
+        """
+        Runs the input distance function on all of the questions and compares with the corpus.
+        Prints out the top k sentence matches
+        Args:
+            distFunc [function]: func for the similarity, defaults to cosine. 
+            k [int]: top k answer sentences to print with the question
+        Returns:
+            None
+        """
 
-        excludeTokens = set(["WHO", "WHAT", "WHEN", "WHERE", "HOW", "?"])
+        qWords = set([WHAT, WHEN, WHO, WHERE, WHY, HOW, WHICH])
 
-        qs = self.questionProcessing(excludeTokens)
+        qs = self.questionProcessing(qWords)
         cs = self.corpusVector(self.spacyCorpus)
 
         for i in range(len(qs)):
             dists = np.apply_along_axis(distFunc, 1, cs, qs[i].sent_vector)
 
-            print("Question:", qs[i].raw_question)
+            print("Question:", qs[i].raw_question, "Type: {}".format(qs[i].question_type))
 
             #print("Answer:", list(self.spacyCorpus.sents)[np.argmax(cos)])
-            ind = dists.argsort()[-3:][::-1] # we might want to look at numbers later?
-            for j in range(3):
+            ind = dists.argsort()[-k:][::-1] # we might want to look at numbers later?
+            for j in range(k):
                 print("Answer", j, ":", list(self.spacyCorpus.sents)[ind[j]])
-            print("")
-
-    def categorize(self):
-        pass
+            print("\n")
 
     def answerQuestion(self, question, sentence):
         pass
