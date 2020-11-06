@@ -1,5 +1,5 @@
 import numpy as np 
-
+from scipy.spatial import distance
 
 def diceSim(u,v):
     denom = np.sum(v) + np.sum(u)
@@ -19,3 +19,6 @@ def jaccardSim(u,v):
         minSum += min([u[i], v[i]])
         maxSum += max([u[i], v[i]])
     return 1 - minSum/maxSum
+
+def scipyJaccard(u, v):
+    return 1 - distance.jaccard(u, v)
