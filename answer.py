@@ -15,6 +15,9 @@ from distUtils import cosine, diceSim, jaccardSim, scipyJaccard
 from parse import Parse
 from question import Question
 
+from transformers import BertForQuestionAnswering
+from transformers import BertTokenizer
+
 WHAT = "WHAT"
 WHEN = "WHEN"
 WHO = "WHO"
@@ -204,6 +207,8 @@ if __name__ == "__main__":
             print("Answer {}: {}".format(i, qObj.answers[i]))
             print("Named Entities: {}".format([ent for ent in qObj.answers[i].ents]), "\n")
         print("\n")
+
+    tokenizer = BertTokenizer.from_pretrained('bert-large-uncased-whole-word-masking-finetuned-squad')
 
     # a = [1.5, 3.45, 5, 0, 23]
     # b = [342, 1, 3, 1000, 3.9]
