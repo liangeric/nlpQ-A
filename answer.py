@@ -9,15 +9,15 @@ import sys
 
 import numpy as np
 import spacy
+import torch
 from sentence_transformers import SentenceTransformer  # Pip installed
+from transformers import AutoModelForQuestionAnswering, AutoTokenizer
 
 from distUtils import cosine, diceSim, jaccardSim, scipyJaccard
 from parse import Parse
 from question import Question
 
-from transformers import AutoTokenizer, AutoModelForQuestionAnswering
-import torch
-
+# Initialization of question words
 WHAT = "WHAT"
 WHEN = "WHEN"
 WHO = "WHO"
@@ -183,6 +183,7 @@ class Answer:
             
             # sorting for top k
             ind = dists.argsort()[-k:][::-1] # we might want to look at numbers later?
+            print("testing random")
             for j in range(k):
                 spacyCorpusList = list(self.spacyCorpus.sents)
                 
