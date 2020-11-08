@@ -183,7 +183,8 @@ class Answer:
             
             # sorting for top k
             ind = dists.argsort()[-k:][::-1] # we might want to look at numbers later?
-            print("testing random")
+
+            print(ind) # testing Windows encoding
             for j in range(k):
                 spacyCorpusList = list(self.spacyCorpus.sents)
                 
