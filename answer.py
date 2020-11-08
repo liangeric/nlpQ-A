@@ -248,6 +248,10 @@ if __name__ == "__main__":
     orgQuestion = "In honor of whom was Pittsburgh named in 1758 by General John Forbes?"
     print(answer.answerQuestion(orgQuestion,orgAnswer))
 
+    orgAnswer = "The first is called the Meidum pyramid, named for its location in Egypt first."
+    orgQuestion = "Who was the first Pharaoh of the Old Kingdom?"
+    print(answer.answerQuestion(orgQuestion,orgAnswer))
+
     # a = [1.5, 3.45, 5, 0, 23]
     # b = [342, 1, 3, 1000, 3.9]
     # c = [1.5, 3.45, 5, 0, 23]
