@@ -9,15 +9,15 @@ import sys
 
 import numpy as np
 import spacy
+import torch
 from sentence_transformers import SentenceTransformer  # Pip installed
+from transformers import AutoModelForQuestionAnswering, AutoTokenizer
 
 from distUtils import cosine, diceSim, jaccardSim, scipyJaccard
 from parse import Parse
 from question import Question
 
-from transformers import AutoTokenizer, AutoModelForQuestionAnswering
-import torch
-
+# Initialization of question words
 WHAT = "WHAT"
 WHEN = "WHEN"
 WHO = "WHO"
@@ -175,7 +175,6 @@ class Answer:
 
         # Run corpus parsing, with the spacy doc object. Return a 2D numpy array, (numSents, len(sentVec))
         cs = self.corpusVector(self.spacyCorpus)
-
         # For every question
         for i in range(len(qs)):
             
@@ -183,7 +182,8 @@ class Answer:
             dists = np.apply_along_axis(distFunc, 1, cs, qs[i].sent_vector)
             
             # sorting for top k
-            ind = dists.argsort()[-k:][::-1] # we might want to look at numbers later?
+            ind = dists.argsort()[-k:][::-1] # test different k values (hyperparameter)
+
             for j in range(k):
                 spacyCorpusList = list(self.spacyCorpus.sents)
                 
@@ -203,8 +203,8 @@ class Answer:
 if __name__ == "__main__":
     article, questions = sys.argv[1], sys.argv[2]
 
-    article = open(article, "r").read()
-    questions = open(questions, "r").read()
+    article = open(article, "r", encoding="UTF-8").read()
+    questions = open(questions, "r", encoding="UTF-8").read()
 
     answer = Answer(article, questions)
     answer.preprocess()
@@ -229,7 +229,7 @@ if __name__ == "__main__":
         for i in range(len(qObj.answers)):
             # Get answer
             orgAnswer = qObj.answers[i]
-            print("Answer {}: {}".format(i, qObj.answers[i]))
+            print("Answer {}: {}".format(i, orgAnswer))
 
             print("Found Answer:")
             print(answer.answerQuestion(orgQuestion,orgAnswer))
