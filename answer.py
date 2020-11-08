@@ -238,8 +238,8 @@ if __name__ == "__main__":
         print("\n")
 
     # Used for manual unit testing of a case
-    orgQuestion = "When was Pittsburgh named by General John Forbes, in honor of British statesman William Pitt, 1st Earl of Chatham?"
     orgAnswer = "Pittsburgh was named in 1758 by General John Forbes, in honor of British statesman William Pitt, 1st Earl of Chatham."
+    orgQuestion = "When was Pittsburgh named by General John Forbes, in honor of British statesman William Pitt, 1st Earl of Chatham?"
     print(answer.answerQuestion(orgQuestion,orgAnswer))
     orgQuestion = "What was named in 1758 by General John Forbes?"
     print(answer.answerQuestion(orgQuestion,orgAnswer))
