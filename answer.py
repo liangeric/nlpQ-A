@@ -5,7 +5,7 @@ Python command: python answer.py article.txt questions.txt
 '''
 
 import re
-import sys
+import sys, os
 
 import numpy as np
 import spacy
