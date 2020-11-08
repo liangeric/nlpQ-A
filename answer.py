@@ -182,9 +182,8 @@ class Answer:
             dists = np.apply_along_axis(distFunc, 1, cs, qs[i].sent_vector)
             
             # sorting for top k
-            ind = dists.argsort()[-k:][::-1] # we might want to look at numbers later?
+            ind = dists.argsort()[-k:][::-1] # test different k values (hyperparameter)
 
-            print(ind) # testing Windows encoding
             for j in range(k):
                 spacyCorpusList = list(self.spacyCorpus.sents)
                 
@@ -230,7 +229,7 @@ if __name__ == "__main__":
         for i in range(len(qObj.answers)):
             # Get answer
             orgAnswer = qObj.answers[i]
-            print("Answer {}: {}".format(i, qObj.answers[i]))
+            print("Answer {}: {}".format(i, orgAnswer))
 
             print("Found Answer:")
             print(answer.answerQuestion(orgQuestion,orgAnswer))
