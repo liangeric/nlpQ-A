@@ -237,9 +237,9 @@ if __name__ == "__main__":
 
         print("\n")
 
-    # Used for manual testing of a case
-    orgQuestion = "What was the most dynamic period of development of Egypt?"
-    orgAnswer = "2649–2150 BC was one of the most dynamic periods in the development of Egyptian art."
+    # Used for manual unit testing of a case
+    orgQuestion = "Was King Khufu one of the Pharaohs that built the Giza pyramids?"
+    orgAnswer = "Sneferu was succeeded by his son, Khufu (2589–2566 BC), who had not built the Great Pyramid of Giza."
     print(answer.answerQuestion(orgQuestion,orgAnswer))
 
     # a = [1.5, 3.45, 5, 0, 23]
