@@ -238,8 +238,14 @@ if __name__ == "__main__":
         print("\n")
 
     # Used for manual unit testing of a case
-    orgQuestion = "Was King Khufu one of the Pharaohs that built the Giza pyramids?"
-    orgAnswer = "Sneferu was succeeded by his son, Khufu (2589–2566 BC), who had not built the Great Pyramid of Giza."
+    orgQuestion = "When was Pittsburgh named by General John Forbes, in honor of British statesman William Pitt, 1st Earl of Chatham?"
+    orgAnswer = "Pittsburgh was named in 1758 by General John Forbes, in honor of British statesman William Pitt, 1st Earl of Chatham."
+    print(answer.answerQuestion(orgQuestion,orgAnswer))
+    orgQuestion = "What was named in 1758 by General John Forbes?"
+    print(answer.answerQuestion(orgQuestion,orgAnswer))
+    orgQuestion = "Who named Pittsburgh in 1758?"
+    print(answer.answerQuestion(orgQuestion,orgAnswer))
+    orgQuestion = "In honor of whom was Pittsburgh named in 1758 by General John Forbes?"
     print(answer.answerQuestion(orgQuestion,orgAnswer))
 
     # a = [1.5, 3.45, 5, 0, 23]
