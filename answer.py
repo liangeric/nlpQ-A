@@ -175,7 +175,6 @@ class Answer:
 
         # Run corpus parsing, with the spacy doc object. Return a 2D numpy array, (numSents, len(sentVec))
         cs = self.corpusVector(self.spacyCorpus)
-
         # For every question
         for i in range(len(qs)):
             
@@ -203,8 +202,8 @@ class Answer:
 if __name__ == "__main__":
     article, questions = sys.argv[1], sys.argv[2]
 
-    article = open(article, "r").read()
-    questions = open(questions, "r").read()
+    article = open(article, "r", encoding="UTF-8").read()
+    questions = open(questions, "r", encoding="UTF-8").read()
 
     answer = Answer(article, questions)
     answer.preprocess()

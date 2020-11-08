@@ -27,6 +27,7 @@ class Question:
         # list of top-k answer sentences, in the format of a spacy sent objects
         self.answers = [] 
 
+# DEPRECIATED
 class QuestionProcess:
     def __init__(self):
         self.questions = None
