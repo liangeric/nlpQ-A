@@ -15,8 +15,8 @@ from distUtils import cosine, diceSim, jaccardSim, scipyJaccard
 from parse import Parse
 from question import Question
 
-from transformers import BertForQuestionAnswering
-from transformers import BertTokenizer
+from transformers import AutoTokenizer, AutoModelForQuestionAnswering
+import torch
 
 WHAT = "WHAT"
 WHEN = "WHEN"
@@ -35,6 +35,10 @@ class Answer:
         self.questions = questions
 
         self.nlp = spacy.load("en_core_web_md")  # spacy model
+
+        # read in BERT model and tokenizer
+        self.tokenizer = AutoTokenizer.from_pretrained("deepset/bert-base-cased-squad2") 
+        self.model = AutoModelForQuestionAnswering.from_pretrained("deepset/bert-base-cased-squad2")
 
     def preprocess(self):
         """[preprocess the corpus and create spacy objects for corpus and questions]
@@ -187,9 +191,14 @@ class Answer:
                 qs[i].answers.append(spacyCorpusList[ind[j]])
         return qs
         
-    def answerQuestion(self, question, sentence):
-        pass
-
+    def answerQuestion(self, orgQuestion, orgAnswer):
+        # encode and get best possible answer from sentence
+        inputs = self.tokenizer.encode_plus(str(orgQuestion), str(orgAnswer), return_tensors="pt")
+        answer_start_scores, answer_end_scores = self.model(**inputs)
+        answer_start = torch.argmax(answer_start_scores)
+        answer_end = torch.argmax(answer_end_scores) + 1
+        correct_tokens = self.tokenizer.convert_ids_to_tokens(inputs["input_ids"][0][answer_start:answer_end])
+        return self.tokenizer.convert_tokens_to_string(correct_tokens)
 
 if __name__ == "__main__":
     article, questions = sys.argv[1], sys.argv[2]
@@ -200,6 +209,9 @@ if __name__ == "__main__":
     answer = Answer(article, questions)
     answer.preprocess()
     qsObjLst = answer.similarity(distFunc=jaccardSim)
+
+    # print statements used to debug preprocessing and similarity matching
+    """
     for qObj in qsObjLst:
         print("Question: {} TYPE: {}".format(qObj.raw_question, qObj.question_type))
         print("Named Entity: {}".format([ent for ent in qObj.spacyDoc.ents]), "\n")
@@ -207,8 +219,28 @@ if __name__ == "__main__":
             print("Answer {}: {}".format(i, qObj.answers[i]))
             print("Named Entities: {}".format([ent for ent in qObj.answers[i].ents]), "\n")
         print("\n")
+    """
 
-    tokenizer = BertTokenizer.from_pretrained('bert-large-uncased-whole-word-masking-finetuned-squad')
+    for qObj in qsObjLst:
+        # Get question
+        orgQuestion = qObj.raw_question
+        print("Question: {}".format(qObj.raw_question))
+
+        for i in range(len(qObj.answers)):
+            # Get answer
+            orgAnswer = qObj.answers[i]
+            print("Answer {}: {}".format(i, qObj.answers[i]))
+
+            print("Found Answer:")
+            print(answer.answerQuestion(orgQuestion,orgAnswer))
+            print("\n")
+
+        print("\n")
+
+    # Used for manual testing of a case
+    orgQuestion = "What was the most dynamic period of development of Egypt?"
+    orgAnswer = "2649–2150 BC was one of the most dynamic periods in the development of Egyptian art."
+    print(answer.answerQuestion(orgQuestion,orgAnswer))
 
     # a = [1.5, 3.45, 5, 0, 23]
     # b = [342, 1, 3, 1000, 3.9]
