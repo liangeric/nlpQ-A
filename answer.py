@@ -5,27 +5,33 @@ Python command: python answer.py article.txt questions.txt
 '''
 
 from parse import Parse
-from sentence_transformers import SentenceTransformer # Pip installed
+from question import QuestionProcess
+from sentence_transformers import SentenceTransformer  # Pip installed
 import sys
 import spacy
 import numpy as np
 import re
 from scipy.spatial import distance
 
+
 def cosine(u, v):
     return np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
 
-# Should be vectorized eventually. this is kinda a zzz 
+# Should be vectorized eventually. this is kinda a zzz
 # using 1 - jaccardSim bc it's weird like that (:
-def jaccardSim(u,v):
+
+
+def jaccardSim(u, v):
     minSum, maxSum = 0, 0
     for i in range(len(u)):
         minSum += min([u[i], v[i]])
         maxSum += max([u[i], v[i]])
     return 1 - minSum/maxSum
 
+
 def scipyJaccard(u, v):
     return 1 - distance.jaccard(u, v)
+
 
 class Answer:
     def __init__(self, article, questions):
@@ -44,9 +50,6 @@ class Answer:
 
         self.questions = re.sub(r"[\n]+", " ", self.questions)
 
-        self.spacyCorpus = self.nlp(self.corpus)
-        self.spacyQuestions = self.nlp(self.questions)
-
     def getAverageVector(self, doc, excludeTokens=None):
         """[get the average vectors for a given doc]
 
@@ -59,7 +62,8 @@ class Answer:
         """
         avg = []
         for sentence in doc.sents:
-            accum = np.zeros((300,))  # This value is hardcoded from the Spacy Word2Vec model
+            # This value is hardcoded from the Spacy Word2Vec model
+            accum = np.zeros((300,))
             for word in sentence:
 
                 # if given excludeTokens, skip word if it's in excludeTokens
@@ -99,11 +103,12 @@ class Answer:
                 # I dont want to remove stopping since we are looking at the sentence level now
                 parsedSentence.append(word.text)
 
-            sentences.append(" ".join(parsedSentence)) # Now we join all of the word back together 
+            # Now we join all of the word back together
+            sentences.append(" ".join(parsedSentence))
 
         # Takes in a list of strings, careful to feed in string and not spacy objects
         # Returns a list of numpy arrays
-        sentence_embeddings = model.encode(sentences) 
+        sentence_embeddings = model.encode(sentences)
         # assert(len(sentence_embeddings) == len(list(doc.sents)))
         return sentence_embeddings
 
@@ -120,7 +125,8 @@ class Answer:
             print("Question:", list(self.spacyQuestions.sents)[i])
 
             #print("Answer:", list(self.spacyCorpus.sents)[np.argmax(cos)])
-            ind = dists.argsort()[-3:][::-1] # we might want to look at numbers later?
+            # we might want to look at numbers later?
+            ind = dists.argsort()[-3:][::-1]
             for j in range(3):
                 print("Answer", j, ":", list(self.spacyCorpus.sents)[ind[j]])
             print("")
@@ -140,7 +146,7 @@ if __name__ == "__main__":
 
     answer = Answer(article, questions)
     answer.preprocess()
-    answer.similarity(distFunc  = jaccardSim)
+    answer.similarity(distFunc=jaccardSim)
     # a = [1.5, 3.45, 5, 0, 23]
     # b = [342, 1, 3, 1000, 3.9]
     # c = [1.5, 3.45, 5, 0, 23]
