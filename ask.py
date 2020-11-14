@@ -152,6 +152,7 @@ class Ask:
 
         # go through each one in pps
         # generate question
+        # TODO: Actually generate where questions based on preposition, DOES NOT WORK YET
         print(listOfPrepositions)
         return listOfPrepositions
 
@@ -243,7 +244,7 @@ class Ask:
             self.generateWhat(sent)
             self.generateWho(sent)
             self.generateWhAux(sent)
-            # self.generateWhere(sent)
+            # self.generateWhere(sent) # this method is not completed yet
 
     def chooseNQuestions(self):
         """Method that handles last part in the pipeline. Randomly picks question type
