@@ -6,6 +6,7 @@ Python command: python answer.py article.txt questions.txt
 
 import re
 import sys
+import os
 
 import numpy as np
 import spacy
@@ -28,7 +29,6 @@ WHICH = "WHICH"
 BINARY = "BINARY"
 
 
-
 class Answer:
     def __init__(self, article, questions):
         self.article = article
@@ -37,8 +37,10 @@ class Answer:
         self.nlp = spacy.load("en_core_web_md")  # spacy model
 
         # read in BERT model and tokenizer
-        self.tokenizer = AutoTokenizer.from_pretrained("deepset/bert-base-cased-squad2") 
-        self.model = AutoModelForQuestionAnswering.from_pretrained("deepset/bert-base-cased-squad2")
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            "deepset/bert-base-cased-squad2")
+        self.model = AutoModelForQuestionAnswering.from_pretrained(
+            "deepset/bert-base-cased-squad2")
 
     def preprocess(self):
         """[preprocess the corpus and create spacy objects for corpus and questions]
@@ -56,17 +58,16 @@ class Answer:
     # depreciated
     def getAverageVector(self, doc, excludeTokens=None):
         """[get the average vectors for a given doc]
-
         Args:
             doc ([spacy]): [spacy model from text]
             excludeTokens ([set], optional): [tokens to exclude]. Defaults to None.
-
         Returns:
             [list]: [avg]
         """
         avg = []
         for sentence in doc.sents:
-            accum = np.zeros((300,))  # This value is hardcoded from the Spacy Word2Vec model
+            # This value is hardcoded from the Spacy Word2Vec model
+            accum = np.zeros((300,))
             for word in sentence:
 
                 # if given excludeTokens, skip word if it's in excludeTokens
@@ -82,10 +83,8 @@ class Answer:
 
     def questionProcessing(self, qWords=None):
         """ Specialized parsing for the questions. 
-
         Args:
             qWords ([set]): [question words, "WHO", "WHAT", ...]
-
         Returns:
             [list]: list of Question Object, each stores info on the question: type, vec, raw, parsed
         """
@@ -100,27 +99,30 @@ class Answer:
                 continue
             # Initialize Question Class Object, and start storing information
             parsedQ, newQuestion = [], Question()
-            newQuestion.raw_question = question + "?"  # adding it back, since we split on it
-            newQuestion.spacyDoc = self.nlp(question)  # Create the spacy doc on this single question
+            # adding it back, since we split on it
+            newQuestion.raw_question = question + "?"
+            # Create the spacy doc on this single question
+            newQuestion.spacyDoc = self.nlp(question)
 
             # Remove the question word, categorize the question, and get its vector with sentence Transformer
             for word in question.split(" "):
 
                 # If word in qWords, we have found the question class, and dont add to parsedQ
-                # This does not solve the issues with 'can you repeat what elmo said?' 
+                # This does not solve the issues with 'can you repeat what elmo said?'
                 if word.upper() in qWords:
                     newQuestion.question_type = word.upper()
                     continue
                 parsedQ.append(word)
-            
+
             # If the question_type was not set, it means lacks a question word, therefore should be Binary/other
             if newQuestion.question_type is None:
                 newQuestion.question_type = BINARY
-            newQuestion.parsed_version  = " ".join(parsedQ)  # Now we join all of the word back together 
+            # Now we join all of the word back together
+            newQuestion.parsed_version = " ".join(parsedQ)
             # print(newQuestion.parsed_version)
 
-            newQuestion.sent_vector = model.encode(newQuestion.parsed_version)  
-            parsedQuestions.append(newQuestion) 
+            newQuestion.sent_vector = model.encode(newQuestion.parsed_version)
+            parsedQuestions.append(newQuestion)
 
         return parsedQuestions
 
@@ -148,14 +150,14 @@ class Answer:
                 # I dont want to remove stopping since we are looking at the sentence level now
                 parsedSentence.append(word.text)
 
-            sentences.append(" ".join(parsedSentence)) # Now we join all of the word back together 
+            # Now we join all of the word back together
+            sentences.append(" ".join(parsedSentence))
 
         # Takes in a list of strings, careful to feed in string and not spacy objects
         # Returns a list of numpy arrays
-        sentence_embeddings = model.encode(sentences) 
+        sentence_embeddings = model.encode(sentences)
         # assert(len(sentence_embeddings) == len(list(doc.sents)))
         return sentence_embeddings
-
 
     def similarity(self, distFunc=cosine, k=3):
         """
@@ -177,28 +179,32 @@ class Answer:
         cs = self.corpusVector(self.spacyCorpus)
         # For every question
         for i in range(len(qs)):
-            
+
             # Apply the dist similarity function down the numpy array of the corpuss
             dists = np.apply_along_axis(distFunc, 1, cs, qs[i].sent_vector)
-            
+
             # sorting for top k
-            ind = dists.argsort()[-k:][::-1] # we might want to look at numbers later?
-            print("testing random")
+            # test different k values (hyperparameter)
+            ind = dists.argsort()[-k:][::-1]
+
             for j in range(k):
                 spacyCorpusList = list(self.spacyCorpus.sents)
-                
+
                 # Add this answer to question object
                 qs[i].answers.append(spacyCorpusList[ind[j]])
         return qs
-        
+
     def answerQuestion(self, orgQuestion, orgAnswer):
         # encode and get best possible answer from sentence
-        inputs = self.tokenizer.encode_plus(str(orgQuestion), str(orgAnswer), return_tensors="pt")
+        inputs = self.tokenizer.encode_plus(
+            str(orgQuestion), str(orgAnswer), return_tensors="pt")
         answer_start_scores, answer_end_scores = self.model(**inputs)
         answer_start = torch.argmax(answer_start_scores)
         answer_end = torch.argmax(answer_end_scores) + 1
-        correct_tokens = self.tokenizer.convert_ids_to_tokens(inputs["input_ids"][0][answer_start:answer_end])
+        correct_tokens = self.tokenizer.convert_ids_to_tokens(
+            inputs["input_ids"][0][answer_start:answer_end])
         return self.tokenizer.convert_tokens_to_string(correct_tokens)
+
 
 if __name__ == "__main__":
     article, questions = sys.argv[1], sys.argv[2]
@@ -229,10 +235,10 @@ if __name__ == "__main__":
         for i in range(len(qObj.answers)):
             # Get answer
             orgAnswer = qObj.answers[i]
-            print("Answer {}: {}".format(i, qObj.answers[i]))
+            print("Answer {}: {}".format(i, orgAnswer))
 
             print("Found Answer:")
-            print(answer.answerQuestion(orgQuestion,orgAnswer))
+            print(answer.answerQuestion(orgQuestion, orgAnswer))
             print("\n")
 
         print("\n")
@@ -240,13 +246,17 @@ if __name__ == "__main__":
     # Used for manual unit testing of a case
     orgAnswer = "Pittsburgh was named in 1758 by General John Forbes, in honor of British statesman William Pitt, 1st Earl of Chatham."
     orgQuestion = "When was Pittsburgh named by General John Forbes, in honor of British statesman William Pitt, 1st Earl of Chatham?"
-    print(answer.answerQuestion(orgQuestion,orgAnswer))
+    print(answer.answerQuestion(orgQuestion, orgAnswer))
     orgQuestion = "What was named in 1758 by General John Forbes?"
-    print(answer.answerQuestion(orgQuestion,orgAnswer))
+    print(answer.answerQuestion(orgQuestion, orgAnswer))
     orgQuestion = "Who named Pittsburgh in 1758?"
-    print(answer.answerQuestion(orgQuestion,orgAnswer))
+    print(answer.answerQuestion(orgQuestion, orgAnswer))
     orgQuestion = "In honor of whom was Pittsburgh named in 1758 by General John Forbes?"
-    print(answer.answerQuestion(orgQuestion,orgAnswer))
+    print(answer.answerQuestion(orgQuestion, orgAnswer))
+
+    orgAnswer = "The first is called the Meidum pyramid, named for its location in Egypt first."
+    orgQuestion = "Who was the first Pharaoh of the Old Kingdom?"
+    print(answer.answerQuestion(orgQuestion, orgAnswer))
 
     # a = [1.5, 3.45, 5, 0, 23]
     # b = [342, 1, 3, 1000, 3.9]
