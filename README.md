@@ -24,3 +24,9 @@ Create the conda environment `conda env create --file environment.yml`
 Be sure you are always operating in the same conda environment.
 Everytime we need to add a new pacakage, add it in the environment.yml, run the above command. 
 Everytime you pull from GitHub, run the command `conda env update -f environment.yml` just in case we have new dependencies.
+
+## Building Docker ## 
+
+1. Install and setup Docker
+2. Run `docker build --tag=${ImageName}`
+3. Run `chmod 777 test.sh && sh test.sh dryrun`
