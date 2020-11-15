@@ -92,7 +92,18 @@ class Ask:
             print(currQuestion)
 
     def generateBinary(self, sent):
-        return None
+        question = ""
+        for token in sent:
+            # print(
+            #     f"{token.text:<20}{token.pos_:<20}{token.dep_:<20}{token.head.text:<20}")
+            if token.pos_ == "AUX" and token.dep_ == "ROOT":
+                question_word = token.text.capitalize()
+                question_body = ''.join(
+                    t.text_with_ws.lower() for t in self.spacyCorpus[sent.start:sent.end-1] if t.i != token.i)
+                question = f"{question_word} {question_body}"
+                break
+
+        self.addQuestionToDict(question, BINARY)
 
     def generateWhAux(self, sent):
         """Method that will look for AUX pos and will generate WHO, WHAT, WHERE questions accordingly
@@ -226,7 +237,10 @@ class Ask:
 
         if len(question):
             question = question.strip()
-            completed_question = f"{TYPE} {question}?"
+            if TYPE == BINARY:
+                completed_question = f"{question}?"
+            else:
+                completed_question = f"{TYPE} {question}?"
             # TODO: check the grammar of this generated question
             # TODO: make sure a question that is essentially the same but not 100% the same as another question is not added
 
@@ -244,6 +258,7 @@ class Ask:
             self.generateWhat(sent)
             self.generateWho(sent)
             self.generateWhAux(sent)
+            self.generateBinary(sent)
             # self.generateWhere(sent) # this method is not completed yet
 
     def chooseNQuestions(self):
@@ -268,6 +283,8 @@ class Ask:
                     question_types.remove(current_question_type)
                 else:
                     pick_question = random.sample(current_questions_set, 1)[0]
+                    if len(pick_question) > 100:  # to ensure better quality of questions
+                        continue
                     print(pick_question)
                     current_questions_set.remove(pick_question)
                     self.nquestions -= 1
