@@ -11,7 +11,6 @@ import spacy
 
 from parse import Parse
 
-
 class Ask:
     def __init__(self, article, nquestions):
         self.article = article
@@ -46,17 +45,27 @@ class Ask:
             if foundDate:
                 # print([(tok, tok.pos, tok.dep_) for tok in sent])
                 print("Chunks", [c for c in sent.noun_chunks])
+                plural = False # default to singular
                 for chunk in sent.noun_chunks:
                     
                     if chunk.root.dep_  == "nsubj":
-                        currQuestion.append((chunk.text, chunk.root.dep_))
-                        currQuestion.append((chunk.root.head.text, chunk.root.head.lemma_))
+                        currQuestion.append(chunk.text)
+                        currQuestion.append(chunk.root.head.lemma_)
                         rootVerb = chunk.root.head
+                        #plural vs singular
+                        if chunk.root.tag_ == "NNPS" or chunk.root.tag_ == "NNS":
+                            plural = True
+                        tagMap = self.nlp.vocab.morphology.tag_map[chunk.root.head.tag_]
+                        pastTense = False #default to present tense
+                        print(chunk.root.head.text, tagMap)
+                        if "Tense_past" in tagMap and tagMap["Tense_past"] == True:
+                            pastTense = True
+                        
+                        
 
-                        # currQuestion.append((chunk.root.head.text))
                     if chunk.root.dep_ == "dobj" and chunk.root.head.text == rootVerb.text:
-                        obj = (chunk.text, "dobj")
-                        obj_text = chunk.text
+                        obj = chunk.text
+                        
                 if obj is not None:
                     currQuestion.append(obj)
                 #  re parse for preposition and the object that relates to it.
@@ -72,8 +81,20 @@ class Ask:
                     if "[auxVerb]" in currQuestion:
                         currQuestion.remove("[auxVerb]")
                     currQuestion.insert(1, rootVerb)
-                    
-                print(currQuestion)
+                else:
+                    if pastTense:
+                        conjugatedVerb = "did"
+                    else: #presentTense
+                        if plural:
+                            conjugatedVerb = "do"
+                        else: #singular
+                            conjugatedVerb = "did"
+                        
+                    if "[auxVerb]" in currQuestion:
+                        currQuestion.remove("[auxVerb]")
+                    currQuestion.insert(1, conjugatedVerb)
+                if len(currQuestion) > 2:
+                    print(currQuestion)
             print("\n")
 
     # just exploring trying to parse  dep tree
@@ -99,9 +120,24 @@ class Ask:
                         currQuestion.append(([l for l in possible_subject.lefts], "left"))
                         currQuestion.append((possible_subject, "nsubj"))
                         currQuestion.append((possible_subject.head, "VERB"))
+
+                        #if possible_subject.head.lemma_ == "be":
+                            #is - singular, present tense
+                            
+                            #am - subject == I, singular, present tense
+                            #are - subject == you OR plural, present tense
+                            #was - subject = singular, past tense
+                            #were - subject = plural, past tense
+                        #else:
+                            
+                            #past: did
+                            #singular: does
+                            #plural: do
+                            #currQuestion[1] = "do"
                         break
                         
-
+                if len(currQuestion) < 4:
+                    break 
                 print(currQuestion)
             print("\n")
     def generateQuestions(self):
@@ -112,7 +148,7 @@ class Ask:
 
 
 if __name__ == "__main__":
-    article, nquestions = sys.argv[1], sys.argv[2]
+    article, nquestions = "a1.txt", 1#sys.argv[1], sys.argv[2]
 
     article = open(article, "r", encoding="UTF-8").read()
     nquestions = int(nquestions)
