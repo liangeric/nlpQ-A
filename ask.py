@@ -258,7 +258,7 @@ class Ask:
         question_types = list(self.questionsGenerated.keys())
         while self.nquestions > 0:
             if not len(question_types):
-                print("Unable to generate more questions 😂")
+                print("Unable to generate more questions")
                 break
             else:
                 current_question_type = random.choice(question_types)
