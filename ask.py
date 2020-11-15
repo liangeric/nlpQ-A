@@ -80,27 +80,25 @@ class Ask:
             if foundDate:
                 # print([(tok, tok.pos, tok.dep_) for tok in sent])
                 print("Chunks", [c for c in sent.noun_chunks])
-                plural = False # default to singular
+                plural = False  # default to singular
                 for chunk in sent.noun_chunks:
-                    
-                    if chunk.root.dep_  == "nsubj":
+
+                    if chunk.root.dep_ == "nsubj":
                         currQuestion.append(chunk.text)
                         currQuestion.append(chunk.root.head.lemma_)
                         rootVerb = chunk.root.head
-                        #plural vs singular
+                        # plural vs singular
                         if chunk.root.tag_ == "NNPS" or chunk.root.tag_ == "NNS":
                             plural = True
                         tagMap = self.nlp.vocab.morphology.tag_map[chunk.root.head.tag_]
-                        pastTense = False #default to present tense
+                        pastTense = False  # default to present tense
                         print(chunk.root.head.text, tagMap)
                         if "Tense_past" in tagMap and tagMap["Tense_past"] == True:
                             pastTense = True
-                        
-                        
 
                     if chunk.root.dep_ == "dobj" and chunk.root.head.text == rootVerb.text:
                         obj = chunk.text
-                        
+
                 if obj is not None:
                     currQuestion.append(obj)
                 #  re parse for preposition and the object that relates to it.
@@ -119,12 +117,12 @@ class Ask:
                 else:
                     if pastTense:
                         conjugatedVerb = "did"
-                    else: #presentTense
+                    else:  # presentTense
                         if plural:
                             conjugatedVerb = "do"
-                        else: #singular
+                        else:  # singular
                             conjugatedVerb = "did"
-                        
+
                     if "[auxVerb]" in currQuestion:
                         currQuestion.remove("[auxVerb]")
                     currQuestion.insert(1, conjugatedVerb)
@@ -133,6 +131,16 @@ class Ask:
             print("\n")
 
     def generateBinary(self, sent):
+        """Method that will look generate a binary question from ROOT AUX
+        TODO: Needs work on handling complex questions and weird edge cases
+
+        Parameters
+        ----------
+        sent: spacy span
+            A sentence from the corpus
+        Returns
+        -------
+        """
         question = ""
         for token in sent:
             # print(
@@ -156,6 +164,9 @@ class Ask:
         Returns
         -------
         """
+        WHAT_ENT = set(["ORG", "PRODUCT"])
+        WHERE_ENT = set(["LOC", "GPE"])
+        WHO_ENT = set(["PERSON"])
         for chunk in sent.noun_chunks:
             head = chunk.root.head
 
@@ -167,17 +178,16 @@ class Ask:
                     if not ent or not chunk:
                         continue
                     equal = ent.text.lower() == chunk.text.lower()
+                    if equal and ent.label_ in WHO_ENT:
+                        question_type = WHO
+                        break
 
-                    if equal and ent.label_ in set(["ORG", "PRODUCT"]):
+                    elif equal and ent.label_ in WHAT_ENT:
                         question_type = WHAT
                         break
 
-                    elif equal and ent.label_ in set(["LOC", "GPE"]):
+                    elif equal and ent.label_ in WHERE_ENT:
                         question_type = WHERE
-                        break
-
-                    elif equal and ent.label_ in set(["PERSON"]):
-                        question_type = WHO
                         break
 
                 if question_type is not None:
@@ -305,31 +315,33 @@ class Ask:
             if foundDate:
                 # print([psubj for psubj in sent])
                 for possible_subject in sent:
-                    
+
                     if possible_subject.dep_ == "nsubj" and possible_subject.head.pos_ == "VERB":
-                        currQuestion.append(([l for l in possible_subject.lefts], "left"))
+                        currQuestion.append(
+                            ([l for l in possible_subject.lefts], "left"))
                         currQuestion.append((possible_subject, "nsubj"))
                         currQuestion.append((possible_subject.head, "VERB"))
 
-                        #if possible_subject.head.lemma_ == "be":
-                            #is - singular, present tense
-                            
-                            #am - subject == I, singular, present tense
-                            #are - subject == you OR plural, present tense
-                            #was - subject = singular, past tense
-                            #were - subject = plural, past tense
-                        #else:
-                            
-                            #past: did
-                            #singular: does
-                            #plural: do
-                            #currQuestion[1] = "do"
+                        # if possible_subject.head.lemma_ == "be":
+                        # is - singular, present tense
+
+                        # am - subject == I, singular, present tense
+                        # are - subject == you OR plural, present tense
+                        # was - subject = singular, past tense
+                        # were - subject = plural, past tense
+                        # else:
+
+                        #past: did
+                        #singular: does
+                        #plural: do
+                        #currQuestion[1] = "do"
                         break
-                        
+
                 if len(currQuestion) < 4:
-                    break 
+                    break
                 print(currQuestion)
             print("\n")
+
     def generateQuestions(self):
         """Method that handles generating questions for each sentence in our corpus
 
@@ -394,7 +406,7 @@ class Ask:
 
 
 if __name__ == "__main__":
-    article, nquestions = "a1.txt", 1#sys.argv[1], sys.argv[2]
+    article, nquestions = sys.argv[1], sys.argv[2]
 
     article = open(article, "r", encoding="UTF-8").read()
     nquestions = int(nquestions)
