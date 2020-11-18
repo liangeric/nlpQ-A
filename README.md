@@ -31,4 +31,6 @@ Everytime you pull from GitHub, run the command `conda env update -f environment
 2. Run `docker build --tag=${ImageName}`, ${ImageName} can be whatever name you want and name cannot be caps.
 3. Run `chmod 777 test.sh && sh test.sh ${ImageName}` to run docker
 
-You can use `docker image ls` to list the images you have.
+### Basic docker info
+- You can use `docker image ls` to list the images you have.
+- You can delete a docker image by doing `docker image rm ${ImageName}`
