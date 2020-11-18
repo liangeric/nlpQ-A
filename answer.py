@@ -243,7 +243,7 @@ if __name__ == "__main__":
                 print(foundAnswer)
                 break
             elif i == len(qObj.answers)-1:
-                print("not found")
+                print("Answer not found!")
             #print("\n")
 
         #print("\n")
