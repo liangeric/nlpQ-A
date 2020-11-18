@@ -28,7 +28,7 @@ Everytime you pull from GitHub, run the command `conda env update -f environment
 ## Building Docker ## 
 
 1. [Install](https://docs.docker.com/install/) and setup Docker
-2. Run `docker build --tag=${ImageName}`, ${ImageName} can be whatever name you want and name cannot be caps.
+2. Run `docker build --tag=${ImageName} docker/`, ${ImageName} can be whatever name you want and name cannot be caps.
 3. Run `chmod 777 test.sh && sh test.sh ${ImageName}` to run docker
 
 ### Basic docker info
