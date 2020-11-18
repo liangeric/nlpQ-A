@@ -322,7 +322,17 @@ class Ask:
         """
         question_types = list(self.questionsGenerated.keys())
         while self.nquestions > 0:
-            if not len(question_types):
+            noMoreQuestions = False
+            for i in range(len(question_types)):
+                wh = question_types[i]
+                if len(self.questionsGenerated[wh]) > 1:
+                    break
+                # no questions
+                elif i == len(question_types) - 1 and len(self.questionsGenerated[wh]) == 0:
+                    noMoreQuestions = True
+                    break                    
+
+            if noMoreQuestions:
                 #print("Unable to generate more questions")
                 break
             else:
@@ -334,11 +344,13 @@ class Ask:
                 else:
                     pick_question = random.sample(current_questions_set, 1)[0]
                     if len(pick_question) > 100:  # to ensure better quality of questions
+                        current_questions_set.remove(pick_question)
                         continue
                     print(pick_question)
                     current_questions_set.remove(pick_question)
                     self.nquestions -= 1
 
+    '''
     def printGeneratedQuestions(self, TYPE=None):
         """Utility method that prints out all the questions based on question type for debugging purposes
         Do not use this method in the file program, this is only for debugging purposes.
@@ -357,6 +369,7 @@ class Ask:
                 for q in questions:
                     if q is not None and q != "":
                         print(q)
+    '''
 
 
 if __name__ == "__main__":
