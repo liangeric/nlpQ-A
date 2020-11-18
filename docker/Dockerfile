@@ -19,6 +19,7 @@ ADD answer /QA
 ADD ask /QA
 ADD distUtils.py /QA
 ADD question.py /QA
+ADD createModel.py /QA
 
 # Change the python path to look at the nlp_qa env 
 ENV PATH="/opt/conda/envs/nlp_qa/bin:$PATH"
@@ -28,6 +29,6 @@ CMD ["chmod 777 /QA/*"]
 
 WORKDIR /QA
 
-
+RUN python createModel.py
 ENTRYPOINT ["/bin/bash", "-c"]
 
