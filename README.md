@@ -39,5 +39,6 @@ Everytime you pull from GitHub, run the command `conda env update -f environment
 
 1. Run `docker login` and log into your docker account (make one if you do not have one)!
 2. Run `docker tag <image> <username>/<repository>:<tag>` to tag the image where <image> is the image name, <username> is your username and <respository> and <tag> are the corresponding repository and tag names which you can make. 
+  
   You can test if this works by running `sh test.sh <username>/<repository>:<tag>`.
 3.
