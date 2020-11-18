@@ -4,7 +4,7 @@ This is a NLP project that is a Question and Answer system created by Eric Liang
 
 Click [here](https://youtu.be/kg2jUaCN7gA) to see our progress report/project overview.
 
-### Create Conda Environment
+## Create Conda Environment ##
 
 Create the conda environment `conda env create --file environment.yml`
 
@@ -28,5 +28,5 @@ Everytime you pull from GitHub, run the command `conda env update -f environment
 ## Building Docker ## 
 
 1. Install and setup Docker
-2. Run `docker build --tag=${ImageName}`, name cannot be caps.
-3. Run `chmod 777 test.sh && sh test.sh ${ImageName}`
+2. Run `docker build --tag=${ImageName}`, ${ImageName} can be whatever name you want and name cannot be caps.
+3. Run `chmod 777 test.sh && sh test.sh ${ImageName}` to run docker
