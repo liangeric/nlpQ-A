@@ -34,3 +34,9 @@ Everytime you pull from GitHub, run the command `conda env update -f environment
 ### Basic docker info
 - You can use `docker image ls` to list the images you have.
 - You can delete a docker image by doing `docker image rm ${ImageName}`
+
+### Publishing the image
+
+1. Run `docker login` and log into your docker account (make one if you do not have one)!
+2. Run `docker tag <image> <username>/<repository>:<tag>` to tag the image where <image> is the image name, <username> is your username and <respository> and <tag> are the corresponding repository and tag names which you can make. You can test if this works by running `sh test.sh <username>/<repository>:<tag>`.
+3.
