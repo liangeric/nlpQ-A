@@ -67,32 +67,26 @@ class Ask:
         """
 
         for sent in self.spacyCorpus.sents:
-            # print(sent)
-            # print([(ent, ent.label_) for ent  in sent.ents])
             foundDate, foundEvent = False, False
             whenQuestions = []
             for ent in sent.ents:
                 currQuestion, obj = ["When", "[auxVerb]"], None
                 if ent.label_ in set(["DATE"]):
-                    print("Sentence: {}".format(sent))
-                    print("Entity:", ent, ent.label_)
                     foundDate = True
             if foundDate:
-                # print([(tok, tok.pos, tok.dep_) for tok in sent])
-                print("Chunks", [c for c in sent.noun_chunks])
                 plural = False  # default to singular
                 for chunk in sent.noun_chunks:
-
                     if chunk.root.dep_ == "nsubj":
                         currQuestion.append(chunk.text)
+                        assert(type(chunk.text) == str)
                         currQuestion.append(chunk.root.head.lemma_)
+                        assert(type(chunk.root.head.lemma_) == str)
                         rootVerb = chunk.root.head
                         # plural vs singular
                         if chunk.root.tag_ == "NNPS" or chunk.root.tag_ == "NNS":
                             plural = True
                         tagMap = self.nlp.vocab.morphology.tag_map[chunk.root.head.tag_]
                         pastTense = False  # default to present tense
-                        print(chunk.root.head.text, tagMap)
                         if "Tense_past" in tagMap and tagMap["Tense_past"] == True:
                             pastTense = True
 
@@ -101,6 +95,7 @@ class Ask:
 
                 if obj is not None:
                     currQuestion.append(obj)
+                    assert(type(obj) == str)
                 #  re parse for preposition and the object that relates to it.
                 # for word in sent:
                 #     prep = None
@@ -113,7 +108,8 @@ class Ask:
                     currQuestion = currQuestion[0:-1]
                     if "[auxVerb]" in currQuestion:
                         currQuestion.remove("[auxVerb]")
-                    currQuestion.insert(1, rootVerb)
+                    currQuestion.insert(1, rootVerb.text)
+                    assert(type(rootVerb.text) == str)
                 else:
                     if pastTense:
                         conjugatedVerb = "did"
@@ -127,8 +123,9 @@ class Ask:
                         currQuestion.remove("[auxVerb]")
                     currQuestion.insert(1, conjugatedVerb)
                 if len(currQuestion) > 2:
-                    print(currQuestion)
-            print("\n")
+                    q = " ".join(currQuestion[1:])
+                    self.addQuestionToDict(q, WHEN)
+            
 
     def generateBinary(self, sent):
         """Method that will look generate a binary question from ROOT AUX
@@ -215,7 +212,7 @@ class Ask:
         # go through each one in pps
         # generate question
         # TODO: Actually generate where questions based on preposition, DOES NOT WORK YET
-        print(listOfPrepositions)
+        # print(listOfPrepositions)
         return listOfPrepositions
 
     def generateWho(self, sent):
@@ -297,50 +294,6 @@ class Ask:
 
             self.questionsGenerated[TYPE].add(completed_question)
 
-    # just exploring trying to parse  dep tree
-    def generateWhenQuestionDepTree(self):
-
-        for sent in self.spacyCorpus.sents:
-            # print(sent)
-            # print([(ent, ent.label_) for ent  in sent.ents])
-            foundDate, foundEvent = False, False
-            whenQuestions = []
-            for ent in sent.ents:
-                currQuestion, obj = ["When", "[auxVerb]"], None
-                if ent.label_ in set(["DATE"]):
-                    print("Sentence: {}".format(sent))
-                    # print("Entity:", ent, ent.label_)
-                    foundDate = True
-
-            if foundDate:
-                # print([psubj for psubj in sent])
-                for possible_subject in sent:
-
-                    if possible_subject.dep_ == "nsubj" and possible_subject.head.pos_ == "VERB":
-                        currQuestion.append(
-                            ([l for l in possible_subject.lefts], "left"))
-                        currQuestion.append((possible_subject, "nsubj"))
-                        currQuestion.append((possible_subject.head, "VERB"))
-
-                        # if possible_subject.head.lemma_ == "be":
-                        # is - singular, present tense
-
-                        # am - subject == I, singular, present tense
-                        # are - subject == you OR plural, present tense
-                        # was - subject = singular, past tense
-                        # were - subject = plural, past tense
-                        # else:
-
-                        #past: did
-                        #singular: does
-                        #plural: do
-                        #currQuestion[1] = "do"
-                        break
-
-                if len(currQuestion) < 4:
-                    break
-                print(currQuestion)
-            print("\n")
 
     def generateQuestions(self):
         """Method that handles generating questions for each sentence in our corpus
@@ -355,6 +308,7 @@ class Ask:
             self.generateWho(sent)
             self.generateWhAux(sent)
             self.generateBinary(sent)
+            self.generateWhen(sent)
             # self.generateWhere(sent) # this method is not completed yet
 
     def chooseNQuestions(self):
@@ -369,7 +323,7 @@ class Ask:
         question_types = list(self.questionsGenerated.keys())
         while self.nquestions > 0:
             if not len(question_types):
-                print("Unable to generate more questions")
+                #print("Unable to generate more questions")
                 break
             else:
                 current_question_type = random.choice(question_types)
@@ -418,4 +372,5 @@ if __name__ == "__main__":
     # ask.printGeneratedQuestions(WHAT)
     # ask.printGeneratedQuestions(WHO)
     # ask.printGeneratedQuestions(WHERE)
+    # ask.printGeneratedQuestions(WHEN)
     ask.chooseNQuestions()
