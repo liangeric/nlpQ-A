@@ -230,20 +230,26 @@ if __name__ == "__main__":
     for qObj in qsObjLst:
         # Get question
         orgQuestion = qObj.raw_question
-        print("Question: {}".format(qObj.raw_question))
+        #print("Question: {}".format(qObj.raw_question))
 
         for i in range(len(qObj.answers)):
             # Get answer
             orgAnswer = qObj.answers[i]
-            print("Answer {}: {}".format(i, orgAnswer))
+            #print("Answer {}: {}".format(i, orgAnswer))
 
-            print("Found Answer:")
-            print(answer.answerQuestion(orgQuestion, orgAnswer))
-            print("\n")
+            #print("Found Answer:")
+            foundAnswer = answer.answerQuestion(orgQuestion, orgAnswer)
+            if foundAnswer != "[CLS]" and foundAnswer.strip() != "":
+                print(foundAnswer)
+                break
+            elif i == len(qObj.answers)-1:
+                print("not found")
+            #print("\n")
 
-        print("\n")
+        #print("\n")
 
     # Used for manual unit testing of a case
+    """
     orgAnswer = "Pittsburgh was named in 1758 by General John Forbes, in honor of British statesman William Pitt, 1st Earl of Chatham."
     orgQuestion = "When was Pittsburgh named by General John Forbes, in honor of British statesman William Pitt, 1st Earl of Chatham?"
     print(answer.answerQuestion(orgQuestion, orgAnswer))
@@ -257,6 +263,7 @@ if __name__ == "__main__":
     orgAnswer = "The first is called the Meidum pyramid, named for its location in Egypt first."
     orgQuestion = "Who was the first Pharaoh of the Old Kingdom?"
     print(answer.answerQuestion(orgQuestion, orgAnswer))
+    """
 
     # a = [1.5, 3.45, 5, 0, 23]
     # b = [342, 1, 3, 1000, 3.9]
