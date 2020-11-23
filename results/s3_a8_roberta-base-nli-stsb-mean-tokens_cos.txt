@@ -1,0 +1,56 @@
+Question 0: Who renamed "Jynx", a play on the word "jinx"?
+Answer 0: As a result, they were renamed "Jynx", a play on the word "jinx".
+
+
+Answer 1: Jynx appears in the wild in Pokémon Gold and Silver, Pokémon Platinum, Pokémon HeartGold and SoulSilver, and Pokémon X and Y.
+
+
+Answer 2: Jynx is the evolved form of Smoochum.
+BERT ANSWER: [CLS] Who renamed " Jynx " , a play on the word " jinx " ? [SEP] Jynx is the evolved form of Smoochum
+
+
+Question 1:  What was the original color of Jynx's skin?
+Answer 0: Jynx made an appearance in a contest in All Things Bright and Beautifly.
+
+
+Answer 1: Created by Ken Sugimori, Jynx first appeared in the video games Pokémon Red and Blue and subsequent sequels, later appearing in various merchandise, spinoff titles, or animated and printed adaptations of the franchise.
+
+
+Answer 2: Jynx appears in the wild in Pokémon Gold and Silver, Pokémon Platinum, Pokémon HeartGold and SoulSilver, and Pokémon X and Y.
+BERT ANSWER: [CLS] What was the original color of Jynx ' s skin ? [SEP] Jynx appears in the wild in Pokémon Gold and Silver , Pokémon Platinum
+
+
+Question 2:  Who reffered to Jynx as the "infamous blackface Pokémon?
+Answer 0: Jynx appears in the wild in Pokémon Gold and Silver, Pokémon Platinum, Pokémon HeartGold and SoulSilver, and Pokémon X and Y.
+
+
+Answer 1: Jynx, known in Japan as Rougela (ルージュラ, Rūjura), is a Pokémon species in Nintendo and Game Freak's Pokémon franchise.
+
+
+Answer 2: As a result, they were renamed "Jynx", a play on the word "jinx".
+BERT ANSWER: Answer not found!
+
+
+
+
+Question 3:  When did Jynx first appear in Pokémon anime?
+Answer 0: Jynx appears in the wild in Pokémon Gold and Silver, Pokémon Platinum, Pokémon HeartGold and SoulSilver, and Pokémon X and Y.
+
+
+Answer 1: Jynx, known in Japan as Rougela (ルージュラ, Rūjura), is a Pokémon species in Nintendo and Game Freak's Pokémon franchise.
+
+
+Answer 2: Created by Ken Sugimori, Jynx first appeared in the video games Pokémon Red and Blue and subsequent sequels, later appearing in various merchandise, spinoff titles, or animated and printed adaptations of the franchise.
+BERT ANSWER: Answer not found!
+
+
+
+
+Question 4:  What is the Japanese name of Jynx?
+Answer 0: Jynx, known in Japan as Rougela (ルージュラ, Rūjura), is a Pokémon species in Nintendo and Game Freak's Pokémon franchise.
+BERT ANSWER: Rougela
+
+
+Question 5:  What is a rare Pokémon that is only available through trading with an in-game NPC?
+Answer 0: In Pokémon Red and Blue and their remakes, Pokémon FireRed and LeafGreen, Jynx is a rare Pokémon that is only available through trading with an in-game NPC.
+BERT ANSWER: Jynx

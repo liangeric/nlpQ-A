@@ -1,0 +1,42 @@
+Question: What called Siddhaya and included the original assessment (Kula) plus various cesses?
+Answer 0: Land revenue was called Siddhaya and included the original assessment (Kula) plus various cesses.
+
+
+Answer 1: Hoysala Dynasty, Jyothsna Kamat".
+BERT ANSWER: Jyothsna Kamat
+
+
+Question:  Who were in charge of armies and the chief justice of the Hoysala court was the Dharmadhikari?
+Answer 0: Dandanayakas were in charge of armies and the chief justice of the Hoysala court was the Dharmadhikari.
+
+
+Answer 1: HIs patron was Chandramouli, a minister of King Veera Ballala II.
+
+
+Answer 2: Senior ministers were called Pancha Pradhanas, ministers responsible for foreign affairs were designated Sandhivigrahi and the chief treasurer was Mahabhandari or Hiranyabhandari.
+BERT ANSWER: Answer not found!
+
+
+
+
+Question:  Where were the Hoysala rulers originally from?
+Answer 0: Early inscriptions, dated 1078 and 1090, have implied that the Hoysalas were descendants of the Yadava by referring to the Yadava vamsa (clan) as the "Hoysala vamsa".
+BERT ANSWER: [CLS] Where were the Hoysala rulers originally from ? [SEP] Early inscriptions , dated 1078 and 1090 , have implied that the Hoysalas were descendants of the Yadava
+
+
+Question:  What were the two types of landlords under the Hoysala administration?
+Answer 0: There were two types of landlords (gavunda); gavunda of people (praja gavunda) was lower in status than the wealthy lord of gavundas (prabhu gavunda).
+
+
+Answer 1: Each province had a local governing body consisting of a minister (Mahapradhana) and a treasurer (Bhandari) that reported to the ruler of that province (Dandanayaka).
+
+
+Answer 2: In South India, towns were called Pattana or Pattanam and the marketplace, Nagara or Nagaram, the marketplace serving as the nuclei of a city.
+BERT ANSWER: Answer not found!
+
+
+
+
+Question:  What were the bodyguards that protected the royal family called?
+Answer 0: An elite and well trained force of bodyguards known as Garudas protected the members of the royal family at all times.
+BERT ANSWER: Garudas

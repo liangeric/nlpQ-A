@@ -6,4 +6,4 @@ tokenizer = AutoTokenizer.from_pretrained(
 model = AutoModelForQuestionAnswering.from_pretrained(
     "deepset/bert-base-cased-squad2")
 model = SentenceTransformer('distilbert-base-nli-mean-tokens')
-print("model downloaded")
+# print("model downloaded")
