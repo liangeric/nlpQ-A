@@ -26,6 +26,7 @@ class Question:
         self.spacyDoc = None
         # list of top-k answer sentences, in the format of a spacy sent objects
         self.answers = [] 
+        self.score = []
 
 # DEPRECIATED
 class QuestionProcess:
