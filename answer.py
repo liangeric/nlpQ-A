@@ -244,40 +244,61 @@ if __name__ == "__main__":
     # roberta-base-nli-stsb-mean-tokens pretrain semantic textual similarity model
     # distilbert-base-nli-stsb-mean-token also pretrain STS
     # distilroberta-base-msmarco-v2 pretrain for information retrival and 
-    # qsObjLst = answer.similarity(model="distilroberta-base-msmarco-v2")
-    qsObjLst = answer.similarity(model="roberta-base-nli-stsb-mean-tokens")
-
-    # print statements used to debug preprocessing and similarity matching
-    """
-    for qObj in qsObjLst:
-        print("Question: {} TYPE: {}".format(qObj.raw_question, qObj.question_type))
-        print("Named Entity: {}".format([ent for ent in qObj.spacyDoc.ents]), "\n")
-        for i in range(len(qObj.answers)):
-            print("Answer {}: {}".format(i, qObj.answers[i]))
-            print("Named Entities: {}".format([ent for ent in qObj.answers[i].ents]), "\n")
-        print("\n")
-    """
+    
+    qsObjLst_roberta = answer.similarity(model="roberta-base-nli-stsb-mean-tokens")
+    qsObjLst_marco = answer.similarity(model="distilroberta-base-msmarco-v2")
 
     qIdx = 0
-    for qObj in qsObjLst:
+    for obj_idx in range(len(qsObjLst_marco)):
         # Get question
+        qObj = qsObjLst_marco[obj_idx]
         orgQuestion = qObj.raw_question
         debugPrint("Question {}: {}".format(qIdx, qObj.raw_question))
 
         for i in range(len(qObj.answers)):
             # Get answer
-            orgAnswer = qObj.answers[i]
-            debugPrint("Answer {}: {} \nCOS SCORE: {}".format(i, orgAnswer, qObj.score[i]))
+            # debugPrint("MARCO")
+            qObj = qsObjLst_marco[obj_idx]
+            marcoScore = qObj.score[i]
+            orgAnswer_marco = qObj.answers[i]
+            # debugPrint("Answer {}: {} \nCOS SCORE: {}".format(i, orgAnswer_marco, qObj.score[i]))
+            # debugPrint("ROBERTA")
+            qObj = qsObjLst_roberta[obj_idx]
+            robertaScore = qObj.score[i]
+            orgAnswer_roberta = qObj.answers[i]
+            # debugPrint("Answer {}: {} \nCOS SCORE: {}".format(i, orgAnswer, qObj.score[i]))
+            if robertaScore < marcoScore:
+                debugPrint("Marco was chosen")
+                debugPrint("Answer {}: {} \nCOS SCORE: {}".format(i, orgAnswer_marco,  marcoScore))
+                foundAnswer = answer.answerQuestion(orgQuestion, orgAnswer_marco)
+                if foundAnswer != "[CLS]" and foundAnswer.strip() != "":
+                    debugPrint("BERT ANSWER", end=": ")
+                    print(foundAnswer)
+                    break
+                elif i == len(qObj.answers)-1:
+                    debugPrint("BERT ANSWER", end=": ")
+                    print("Answer not found!")
+            else:
+                debugPrint("Roberta was chosen")
+                debugPrint("Answer {}: {} \nCOS SCORE: {}".format(i, orgAnswer_roberta, robertaScore))
+                foundAnswer = answer.answerQuestion(orgQuestion, orgAnswer_roberta)
+                if foundAnswer != "[CLS]" and foundAnswer.strip() != "":
+                    debugPrint("BERT ANSWER", end=": ")
+                    print(foundAnswer)
+                    break
+                elif i == len(qObj.answers)-1:
+                    debugPrint("BERT ANSWER", end=": ")
+                    print("Answer not found!")
 
-            # debugPrint("Found Answer:")
-            foundAnswer = answer.answerQuestion(orgQuestion, orgAnswer)
-            if foundAnswer != "[CLS]" and foundAnswer.strip() != "":
-                debugPrint("BERT ANSWER", end=": ")
-                print(foundAnswer)
-                break
-            elif i == len(qObj.answers)-1:
-                debugPrint("BERT ANSWER", end=": ")
-                print("Answer not found!")
+            # # debugPrint("Found Answer:")
+            # foundAnswer = answer.answerQuestion(orgQuestion, orgAnswer)
+            # if foundAnswer != "[CLS]" and foundAnswer.strip() != "":
+            #     debugPrint("BERT ANSWER", end=": ")
+            #     print(foundAnswer)
+            #     break
+            # elif i == len(qObj.answers)-1:
+            #     debugPrint("BERT ANSWER", end=": ")
+            #     print("Answer not found!")
             debugPrint("\n")
 
         debugPrint("\n")
@@ -302,12 +323,3 @@ if __name__ == "__main__":
     orgQuestion = "Who was the first Pharaoh of the Old Kingdom?"
     print(answer.answerQuestion(orgQuestion, orgAnswer))
     """
-
-    # a = [1.5, 3.45, 5, 0, 23]
-    # b = [342, 1, 3, 1000, 3.9]
-    # c = [1.5, 3.45, 5, 0, 23]
-    # print(1 - scipyJaccard(a, b))
-    # print(jaccardSim(a, b))
-
-    # print(1 - scipyJaccard(a, c))
-    # print(jaccardSim(a, c))
