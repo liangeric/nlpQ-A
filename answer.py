@@ -18,6 +18,12 @@ from distUtils import cosine, diceSim, jaccardSim, scipyJaccard
 from parse import Parse
 from question import Question
 
+# If false the log function will not print
+DEBUG = True
+
+def debugPrint(s, **kwargs):
+    if DEBUG: print(s, **kwargs)
+
 # Initialization of question words
 WHAT = "WHAT"
 WHEN = "WHEN"
@@ -34,7 +40,7 @@ class Answer:
         self.article = article
         self.questions = questions
 
-        self.nlp = spacy.load("en_core_web_md")  # spacy model
+        self.nlp = spacy.load("en_core_web_lg")  # spacy model
 
         # read in BERT model and tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(
@@ -81,7 +87,7 @@ class Answer:
 
         return avg
 
-    def questionProcessing(self, qWords=None):
+    def questionProcessing(self, qWords=None, model=None):
         """ Specialized parsing for the questions. 
         Args:
             qWords ([set]): [question words, "WHO", "WHAT", ...]
@@ -89,7 +95,12 @@ class Answer:
             [list]: list of Question Object, each stores info on the question: type, vec, raw, parsed
         """
         # This is the only model I tried. First time running should cause a download but afterwards it doesnt download.
-        model = SentenceTransformer('distilbert-base-nli-mean-tokens')
+        # model = SentenceTransformer('distilbert-base-nli-mean-tokens')
+        if model is None:
+            model = SentenceTransformer('distilbert-base-nli-mean-tokens')
+        else:
+            model = SentenceTransformer(model)
+        # model = SentenceTransformer('distilroberta-base-msmarco-v2')
         parsedQuestions = []
 
         # Since we are only looking at questions, we can split on '?'
@@ -126,7 +137,7 @@ class Answer:
 
         return parsedQuestions
 
-    def corpusVector(self, doc, excludeTokens=None):
+    def corpusVector(self, doc, excludeTokens=None, model=None):
         """[get the sentence vector for a given doc]
         Args:
             doc ([spacy]): [spacy model from text]
@@ -135,7 +146,13 @@ class Answer:
             [list]: list of Numpy Arrays of Sentence vector
         """
         # This is the only model I tried. First time running should cause a download but afterwards it doesnt download.
-        model = SentenceTransformer('distilbert-base-nli-mean-tokens')
+        if model is None:
+            model = SentenceTransformer('distilbert-base-nli-mean-tokens')
+        else:
+            model = SentenceTransformer(model)
+        # model = SentenceTransformer("roberta-base-nli-stsb-mean-tokens")
+        # model = SentenceTransformer('distilroberta-base-msmarco-v2')
+
 
         # Gonna build the question without question words and '?'
         sentences = []
@@ -173,10 +190,15 @@ class Answer:
         qWords = set([WHAT, WHEN, WHO, WHERE, WHY, HOW, WHICH])
 
         # Run the processing to return back a list of question objects
-        qs = self.questionProcessing(qWords)
+        # roberta-base-nli-stsb-mean-tokens pretrain semantic textual similarity model
+        # distilbert-base-nli-stsb-mean-token also pretrain STS
+        #  distilroberta-base-msmarco-v2 pretrain for information retrival and 
+
+        qs = self.questionProcessing(qWords, model="distilroberta-base-msmarco-v2")
 
         # Run corpus parsing, with the spacy doc object. Return a 2D numpy array, (numSents, len(sentVec))
-        cs = self.corpusVector(self.spacyCorpus)
+        cs = self.corpusVector(self.spacyCorpus, model="distilroberta-base-msmarco-v2")
+
         # For every question
         for i in range(len(qs)):
 
@@ -214,7 +236,7 @@ if __name__ == "__main__":
 
     answer = Answer(article, questions)
     answer.preprocess()
-    qsObjLst = answer.similarity(distFunc=jaccardSim)
+    qsObjLst = answer.similarity()
 
     # print statements used to debug preprocessing and similarity matching
     """
@@ -226,27 +248,30 @@ if __name__ == "__main__":
             print("Named Entities: {}".format([ent for ent in qObj.answers[i].ents]), "\n")
         print("\n")
     """
-
+    qIdx = 0
     for qObj in qsObjLst:
         # Get question
         orgQuestion = qObj.raw_question
-        #print("Question: {}".format(qObj.raw_question))
+        debugPrint("Question {}: {}".format(qIdx, qObj.raw_question))
 
         for i in range(len(qObj.answers)):
             # Get answer
             orgAnswer = qObj.answers[i]
-            #print("Answer {}: {}".format(i, orgAnswer))
+            debugPrint("Answer {}: {}".format(i, orgAnswer))
 
-            #print("Found Answer:")
+            # debugPrint("Found Answer:")
             foundAnswer = answer.answerQuestion(orgQuestion, orgAnswer)
             if foundAnswer != "[CLS]" and foundAnswer.strip() != "":
+                debugPrint("BERT ANSWER", end=": ")
                 print(foundAnswer)
                 break
             elif i == len(qObj.answers)-1:
+                debugPrint("BERT ANSWER", end=": ")
                 print("Answer not found!")
-            #print("\n")
+            debugPrint("\n")
 
-        #print("\n")
+        debugPrint("\n")
+        qIdx += 1
 
     # Used for manual unit testing of a case
     """

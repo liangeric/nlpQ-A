@@ -1,0 +1,70 @@
+Question: Who was the first Pharaoh of the Old Kingdom?
+Answer 0: The first Pharaoh of the Old Kingdom was Djoser (
+BERT ANSWER: Djoser
+
+
+Question:  When did the Old Kingdom reach its zenith?
+Answer 0: The Old Kingdom and its royal power reached a zenith under the Fourth Dynasty (2613–2494 BC), which began with Sneferu (2613–2589 BC).
+BERT ANSWER: 2613 – 2494 BC
+
+
+Question:  Who perfected the art of carving intricate relief decoration?
+Answer 0: They perfected the art of carving intricate relief decoration and, through keen observation of the natural world, produced detailed images of animals, plants, and even landscapes, recording the essential elements of their world for eternity in scenes painted and carved on the walls of temples and tombs.
+
+
+Answer 1: Architects and masons mastered the techniques necessary to build monumental structures in stone.
+
+
+Answer 2: Sculptors created the earliest portraits of individuals and the first lifesize statues in wood, copper, and stone.
+BERT ANSWER: Answer not found!
+
+
+
+
+Question:  Who did the Fifth Dynasty begin with?
+Answer 0: The Fifth Dynasty (2494–2345 BC) began with Userkaf (2494–2487 BC) and was marked by the growing importance of the cult of sun god Ra.
+BERT ANSWER: Userkaf
+
+
+Question:  When was the Fifth Dynasty?
+Answer 0: The Fifth Dynasty (2494–2345 BC) began with Userkaf (2494–2487 BC) and was marked by the growing importance of the cult of sun god Ra.
+BERT ANSWER: 2494 – 2345 BC
+
+
+Question:  What was the most dynamic period of development of Egypt?
+Answer 0: 2649–2150 BC) was one of the most dynamic periods in the development of Egyptian art.
+
+
+Answer 1: Egypt attained its first continuous peak of civilization – the first of three so-called "Kingdom" periods (followed by the Middle Kingdom and New Kingdom) which mark the high points of civilization in the lower Nile Valley.
+BERT ANSWER: the first of three so - called " Kingdom " periods
+
+
+Question:  Where did Djoser establish his court?
+Answer 0: Under King Djoser, the first king of the Third Dynasty of the Old Kingdom, the royal capital of Egypt was moved to Memphis, where Djoser established his court.
+BERT ANSWER: Memphis
+
+
+Question:  What is the Old Kingdom commonly referred to as?
+Answer 0: The Old Kingdom is most commonly regarded as the period from the Third Dynasty through to the Sixth Dynasty (2686–2181 BC).
+BERT ANSWER: the period from the Third Dynasty through to the Sixth Dynasty ( 2686 – 2181 BC ) .
+
+
+Question:  The Old Kingdom reached its zenith under the Fourth Dynasty; who was the Pharaoh during that time?
+Answer 0: The Old Kingdom and its royal power reached a zenith under the Fourth Dynasty (2613–2494 BC), which began with Sneferu (2613–2589 BC).
+BERT ANSWER: Sneferu
+
+
+Question:   Was King Khufu one of the Pharaohs that built the Giza pyramids?
+Answer 0: Sneferu was succeeded by his son, Khufu (2589–2566 BC), who built the Great Pyramid of Giza.
+BERT ANSWER: Khufu
+
+
+Question:  When the Old Kingdom Period ended, was Pharaoh Pepi II still in power?
+Answer 0: The Old Kingdom and its royal power reached a zenith under the Fourth Dynasty (2613–2494 BC), which began with Sneferu (2613–2589 BC).
+
+
+Answer 1: The last Pharaohs of the dynasty were Menkauhor Kaiu (2421–2414 BC), Djedkare Isesi (2414–2375 BC) and Unas (2375–2345), the earliest ruler to have the pyramid texts inscribed in his pyramid.
+
+
+Answer 2: Internal disorders set in during the incredibly long reign of Pepi II (2278–2184 BC) towards the end of the dynasty.
+BERT ANSWER: end of the dynasty .
