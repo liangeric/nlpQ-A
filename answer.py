@@ -9,6 +9,7 @@ import sys
 import os
 
 import numpy as np
+import time
 import spacy
 import torch
 from sentence_transformers import SentenceTransformer  # Pip installed
@@ -176,7 +177,7 @@ class Answer:
         # assert(len(sentence_embeddings) == len(list(doc.sents)))
         return sentence_embeddings
 
-    def similarity(self, distFunc=cosine, k=3):
+    def similarity(self, distFunc=cosine, k=3, model=None):
         """
         Runs the input distance function on all of the questions and compares with the corpus.
         Add in the corpus spacy objects into the .anwsers attribute
@@ -189,16 +190,13 @@ class Answer:
 
         qWords = set([WHAT, WHEN, WHO, WHERE, WHY, HOW, WHICH])
 
-        # Run the processing to return back a list of question objects
-        # roberta-base-nli-stsb-mean-tokens pretrain semantic textual similarity model
-        # distilbert-base-nli-stsb-mean-token also pretrain STS
-        # distilroberta-base-msmarco-v2 pretrain for information retrival and 
-
-        qs = self.questionProcessing(qWords, model="distilroberta-base-msmarco-v2")
-
-        # Run corpus parsing, with the spacy doc object. Return a 2D numpy array, (numSents, len(sentVec))
-        cs = self.corpusVector(self.spacyCorpus, model="distilroberta-base-msmarco-v2")
-
+        if model is None:
+            qs = self.questionProcessing(qWords, model="distilbert-base-nli-stsb-mean-token")
+            # Run corpus parsing, with the spacy doc object. Return a 2D numpy array, (numSents, len(sentVec))
+            cs = self.corpusVector(self.spacyCorpus, model="distilbert-base-nli-stsb-mean-token")
+        else:
+            qs = self.questionProcessing(qWords, model=model)
+            cs = self.corpusVector(self.spacyCorpus, model=model)
         # For every question
         for i in range(len(qs)):
 
@@ -218,6 +216,9 @@ class Answer:
         return qs
 
     def answerQuestion(self, orgQuestion, orgAnswer):
+        """
+        Some BERT Function by Eric Liang
+        """
         # encode and get best possible answer from sentence
         inputs = self.tokenizer.encode_plus(
             str(orgQuestion), str(orgAnswer), return_tensors="pt")
@@ -230,6 +231,7 @@ class Answer:
 
 
 if __name__ == "__main__":
+    s = time.time()
     article, questions = sys.argv[1], sys.argv[2]
 
     article = open(article, "r", encoding="UTF-8").read()
@@ -237,7 +239,13 @@ if __name__ == "__main__":
 
     answer = Answer(article, questions)
     answer.preprocess()
-    qsObjLst = answer.similarity()
+
+    # Run the processing to return back a list of question objects
+    # roberta-base-nli-stsb-mean-tokens pretrain semantic textual similarity model
+    # distilbert-base-nli-stsb-mean-token also pretrain STS
+    # distilroberta-base-msmarco-v2 pretrain for information retrival and 
+    # qsObjLst = answer.similarity(model="distilroberta-base-msmarco-v2")
+    qsObjLst = answer.similarity(model="roberta-base-nli-stsb-mean-tokens")
 
     # print statements used to debug preprocessing and similarity matching
     """
@@ -249,6 +257,7 @@ if __name__ == "__main__":
             print("Named Entities: {}".format([ent for ent in qObj.answers[i].ents]), "\n")
         print("\n")
     """
+
     qIdx = 0
     for qObj in qsObjLst:
         # Get question
@@ -273,6 +282,9 @@ if __name__ == "__main__":
 
         debugPrint("\n")
         qIdx += 1
+    e = time.time()
+    debugPrint(f"Answering took {e-s} Seconds")
+
 
     # Used for manual unit testing of a case
     """
