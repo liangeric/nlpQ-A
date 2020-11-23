@@ -192,7 +192,7 @@ class Answer:
         # Run the processing to return back a list of question objects
         # roberta-base-nli-stsb-mean-tokens pretrain semantic textual similarity model
         # distilbert-base-nli-stsb-mean-token also pretrain STS
-        #  distilroberta-base-msmarco-v2 pretrain for information retrival and 
+        # distilroberta-base-msmarco-v2 pretrain for information retrival and 
 
         qs = self.questionProcessing(qWords, model="distilroberta-base-msmarco-v2")
 
@@ -214,6 +214,7 @@ class Answer:
 
                 # Add this answer to question object
                 qs[i].answers.append(spacyCorpusList[ind[j]])
+                qs[i].score.append(dists[ind[j]])
         return qs
 
     def answerQuestion(self, orgQuestion, orgAnswer):
@@ -257,7 +258,7 @@ if __name__ == "__main__":
         for i in range(len(qObj.answers)):
             # Get answer
             orgAnswer = qObj.answers[i]
-            debugPrint("Answer {}: {}".format(i, orgAnswer))
+            debugPrint("Answer {}: {} \nCOS SCORE: {}".format(i, orgAnswer, qObj.score[i]))
 
             # debugPrint("Found Answer:")
             foundAnswer = answer.answerQuestion(orgQuestion, orgAnswer)
