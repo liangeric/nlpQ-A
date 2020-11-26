@@ -44,10 +44,14 @@ class Answer:
         self.nlp = spacy.load("en_core_web_lg")  # spacy model
 
         # read in BERT model and tokenizer
+        #self.tokenizer = AutoTokenizer.from_pretrained(
+        #    "deepset/bert-base-cased-squad2")
+        #self.model = AutoModelForQuestionAnswering.from_pretrained(
+        #    "deepset/bert-base-cased-squad2")
         self.tokenizer = AutoTokenizer.from_pretrained(
-            "deepset/bert-base-cased-squad2")
+            "bert-large-uncased-whole-word-masking-finetuned-squad")
         self.model = AutoModelForQuestionAnswering.from_pretrained(
-            "deepset/bert-base-cased-squad2")
+            "bert-large-uncased-whole-word-masking-finetuned-squad")
 
     def preprocess(self):
         """[preprocess the corpus and create spacy objects for corpus and questions]
