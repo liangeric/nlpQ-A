@@ -33,7 +33,7 @@ WHERE = "WHERE"
 WHY = "WHY"
 HOW = "HOW"
 WHICH = "WHICH"
-BINARY = "BINARY"
+BINARY = set(["IS", "AM", "ARE", "WAS", "WERE", "BE", "BEING", "BEEN", "CAN", "COULD", "DO", "DOES", "DID", "HAS", "HAVE", "HAD", "HAVING", "MAY", "MIGHT", "MUST", "OUGHT", "SHALL", "SHOULD", "WILL", "WOULD"])
 
 
 class Answer:
@@ -66,32 +66,6 @@ class Answer:
         self.spacyCorpus = self.nlp(self.corpus)
         # self.spacyQuestions = self.nlp(self.questions)
 
-    # depreciated
-    def getAverageVector(self, doc, excludeTokens=None):
-        """[get the average vectors for a given doc]
-        Args:
-            doc ([spacy]): [spacy model from text]
-            excludeTokens ([set], optional): [tokens to exclude]. Defaults to None.
-        Returns:
-            [list]: [avg]
-        """
-        avg = []
-        for sentence in doc.sents:
-            # This value is hardcoded from the Spacy Word2Vec model
-            accum = np.zeros((300,))
-            for word in sentence:
-
-                # if given excludeTokens, skip word if it's in excludeTokens
-                if excludeTokens is not None and word in excludeTokens:
-                    continue
-
-                if not word.is_stop:
-                    accum += word.vector
-
-            avg.append(accum / len(sentence))
-
-        return avg
-
     def questionProcessing(self, qWords=None, model=None):
         """ Specialized parsing for the questions. 
         Args:
@@ -121,21 +95,28 @@ class Answer:
             newQuestion.spacyDoc = self.nlp(question)
 
             # Remove the question word, categorize the question, and get its vector with sentence Transformer
-            for word in question.split(" "):
-
-                # If word in qWords, we have found the question class, and dont add to parsedQ
-                # This does not solve the issues with 'can you repeat what elmo said?'
-                if word.upper() in qWords:
-                    newQuestion.question_type = word.upper()
+            question_words = question.split(" ")
+            question_word_found = False
+            for word_i in range(len(question_words)):
+                word = question_words[word_i]
+                if word_i == 0 and word in BINARY:
+                    newQuestion.question_type = BINARY
+                    question_word_found = True
                     continue
+                
+                if not question_word_found:
+                    
+                    # If word in qWords, we have found the question class, and dont add to parsedQ
+                    if word.upper() in qWords:
+                        newQuestion.question_type = word.upper()
+                        continue
                 parsedQ.append(word)
 
             # If the question_type was not set, it means lacks a question word, therefore should be Binary/other
             if newQuestion.question_type is None:
-                newQuestion.question_type = BINARY
+                newQuestion.question_type = "BINARY"
             # Now we join all of the word back together
             newQuestion.parsed_version = " ".join(parsedQ)
-            # print(newQuestion.parsed_version)
 
             newQuestion.sent_vector = model.encode(newQuestion.parsed_version)
             parsedQuestions.append(newQuestion)
@@ -191,6 +172,7 @@ class Answer:
         Returns:
             [Question Objects]: list of the question objects
         """
+        #TODO: need to check if the k is below the length of the wikipedia corpus lol
 
         qWords = set([WHAT, WHEN, WHO, WHERE, WHY, HOW, WHICH])
 
@@ -232,6 +214,43 @@ class Answer:
         correct_tokens = self.tokenizer.convert_ids_to_tokens(
             inputs["input_ids"][0][answer_start:answer_end])
         return self.tokenizer.convert_tokens_to_string(correct_tokens)
+    
+    def answerBin(self, answerSent, simScore, qobj):
+        questionNeg = 0 # , self.nlp(question)   # start by  assuming the question is not negated
+        # debugPrint(type(question))
+        # debugPrint([tok.text + " " + tok.dep_ for tok in questionDoc])
+        for t in qobj.spacyDoc:
+            # debugPrint(t.text)
+            if t.dep_ == "neg":
+                questionNeg = 1
+
+        # debugPrint("the question negation is {}".format(questionNeg))
+        if simScore < 0.20:  # If the similarity is really low we should just drop
+            print("Answer Not Found")
+            return
+        ansDoc, ans = self.nlp(answerSent), None
+        for token in ansDoc:
+            #print(token.text, token.dep_, token.head.text, token.head.pos_)
+            if token.dep_ == "ROOT":
+                # print("Found Root, it is", token.text)
+                for child in token.children:
+                    # print(child.text)
+                    if child.head.pos_ == "AUX" and child.dep_ == "neg":
+                        ans = 0
+                        break
+                ans = 1
+                break
+        if questionNeg:
+            if ans:
+                print("No")
+            else:
+                print("Yes")
+        else:
+            if ans:
+                print("Yes")
+            else:
+                print("No")
+        return 
 
 
 if __name__ == "__main__":
@@ -248,8 +267,8 @@ if __name__ == "__main__":
     # roberta-base-nli-stsb-mean-tokens pretrain semantic textual similarity model
     # distilbert-base-nli-stsb-mean-token also pretrain STS
     # distilroberta-base-msmarco-v2 pretrain for information retrival and 
-    # qsObjLst = answer.similarity(model="distilroberta-base-msmarco-v2")
-    qsObjLst = answer.similarity(model="roberta-base-nli-stsb-mean-tokens")
+    qsObjLst = answer.similarity(model="distilroberta-base-msmarco-v2")
+    # qsObjLst = answer.similarity(model="roberta-base-nli-stsb-mean-tokens")
 
     # print statements used to debug preprocessing and similarity matching
     """
@@ -266,7 +285,9 @@ if __name__ == "__main__":
     for qObj in qsObjLst:
         # Get question
         orgQuestion = qObj.raw_question
-        debugPrint("Question {}: {}".format(qIdx, qObj.raw_question))
+
+        debugPrint("Question {}: {}".format(qIdx, orgQuestion))
+        debugPrint(qObj.question_type)
 
         for i in range(len(qObj.answers)):
             # Get answer
@@ -276,6 +297,9 @@ if __name__ == "__main__":
             # debugPrint("Found Answer:")
             foundAnswer = answer.answerQuestion(orgQuestion, orgAnswer)
             if foundAnswer != "[CLS]" and foundAnswer.strip() != "":
+                if qObj.question_type == "BINARY":
+                    answer.answerBin(foundAnswer, qObj.score[i], qObj)
+                    break  # We break since we have answered this question
                 debugPrint("BERT ANSWER", end=": ")
                 print(foundAnswer)
                 break
@@ -307,11 +331,3 @@ if __name__ == "__main__":
     print(answer.answerQuestion(orgQuestion, orgAnswer))
     """
 
-    # a = [1.5, 3.45, 5, 0, 23]
-    # b = [342, 1, 3, 1000, 3.9]
-    # c = [1.5, 3.45, 5, 0, 23]
-    # print(1 - scipyJaccard(a, b))
-    # print(jaccardSim(a, b))
-
-    # print(1 - scipyJaccard(a, c))
-    # print(jaccardSim(a, c))
