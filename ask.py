@@ -44,11 +44,6 @@ class Ask:
             BINARY: set(),
         }
 
-        self.keyWords = {
-            WHERE: set(["to", "at", "between", "near",
-                        "into", "on", "across", "in"])
-        }
-
     def preprocess(self):
         """Method that will preprocess the corpus and intialize the spacy model
 
@@ -204,11 +199,13 @@ class Ask:
         -------
         """
         # TODO: This function is incomplete
+        whereKeyWords = set(["to", "at", "between", "near",
+                             "into", "on", "across", "in"])
         listOfPrepositions = []
         for token in sent:
             self.print_token(token)
             if token.dep_ == "prep" and (token.head.pos_ == "AUX" or token.head.pos_ == "VERB"):
-                if token.text not in self.keyWords[WHERE]:
+                if token.text not in whereKeyWords:
                     continue
                 head_token = token.head
                 print("start head children ------")
@@ -345,11 +342,11 @@ class Ask:
         -------
         """
         for sent in self.spacyCorpus.sents:
-            self.generateWhat(sent)
-            self.generateWho(sent)
-            self.generateWhAux(sent)
+            # self.generateWhat(sent)
+            # self.generateWho(sent)
+            # self.generateWhAux(sent)
             self.generateBinary(sent)
-            self.generateWhen(sent)
+            # self.generateWhen(sent)
             # self.generateWhere(sent)  # this method is not completed yet
 
     def score_questions(self):
