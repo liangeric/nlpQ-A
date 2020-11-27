@@ -10,6 +10,8 @@ import random
 import numpy as np
 import spacy
 
+from fuzzywuzzy import process
+
 from parse import Parse
 
 
@@ -43,7 +45,8 @@ class Ask:
         }
 
         self.keyWords = {
-            WHERE: set(["to", "at", "between", "near", "into", "on", "across"])
+            WHERE: set(["to", "at", "between", "near",
+                        "into", "on", "across", "in"])
         }
 
     def preprocess(self):
@@ -125,11 +128,9 @@ class Ask:
                 if len(currQuestion) > 2:
                     q = " ".join(currQuestion[1:])
                     self.addQuestionToDict(q, WHEN)
-            
 
     def generateBinary(self, sent):
         """Method that will look generate a binary question from ROOT AUX
-        TODO: Needs work on handling complex questions and weird edge cases
 
         Parameters
         ----------
@@ -138,14 +139,15 @@ class Ask:
         Returns
         -------
         """
+        # TODO: Needs work on handling complex questions and weird edge cases
+
         question = ""
         for token in sent:
-            # print(
-            #     f"{token.text:<20}{token.pos_:<20}{token.dep_:<20}{token.head.text:<20}")
+            # self.print_token(token)
             if token.pos_ == "AUX" and token.dep_ == "ROOT":
                 question_word = token.text.capitalize()
                 question_body = ''.join(
-                    t.text_with_ws.lower() for t in self.spacyCorpus[sent.start:sent.end-1] if t.i != token.i)
+                    t.text_with_ws for t in self.spacyCorpus[sent.start:sent.end-1] if t.i != token.i)
                 question = f"{question_word} {question_body}"
                 break
 
@@ -201,19 +203,31 @@ class Ask:
         Returns
         -------
         """
+        # TODO: This function is incomplete
         listOfPrepositions = []
-        for tok in sent:
-            if tok.pos_ == "ADP":
-                if tok.text not in self.keyWords[WHERE]:
+        for token in sent:
+            self.print_token(token)
+            if token.dep_ == "prep" and (token.head.pos_ == "AUX" or token.head.pos_ == "VERB"):
+                if token.text not in self.keyWords[WHERE]:
                     continue
-                prepositionalPhrase = ' '.join([t.text for t in tok.subtree])
-                listOfPrepositions.append(prepositionalPhrase)
+                head_token = token.head
+                print("start head children ------")
+                for child in head_token.children:
+                    self.print_token(child)
+                    if child.dep_ == "nsubj":
+                        print(list(child.children))
+                        for newchild in child.children:
+                            print(newchild.text, list(newchild.children))
+                        nsubj = ''.join(
+                            [t.text_with_ws for t in child.children])
+                        nsubj += child.text_with_ws
+                        q = token.head.text_with_ws + nsubj
+                        self.addQuestionToDict(q, WHERE)
 
-        # go through each one in pps
-        # generate question
-        # TODO: Actually generate where questions based on preposition, DOES NOT WORK YET
-        # print(listOfPrepositions)
-        return listOfPrepositions
+                print("end head children ------")
+
+                prepositionalPhrase = ' '.join([t.text for t in token.subtree])
+                listOfPrepositions.append(prepositionalPhrase)
 
     def generateWho(self, sent):
         """Main method that will generate who questions given a sentence
@@ -283,17 +297,44 @@ class Ask:
         if question is None and TYPE is None:
             return
 
-        if len(question):
+        if len(question) > 0:
             question = question.strip()
+            spacy_question = self.nlp(question)
+            question = self.lowercase_non_propernouns(spacy_question, TYPE)
+
             if TYPE == BINARY:
                 completed_question = f"{question}?"
             else:
                 completed_question = f"{TYPE} {question}?"
-            # TODO: check the grammar of this generated question
-            # TODO: make sure a question that is essentially the same but not 100% the same as another question is not added
 
             self.questionsGenerated[TYPE].add(completed_question)
 
+    def lowercase_non_propernouns(self, sent, TYPE):
+        """This method will take care of case issues when creating a question. 
+        Essentially, will remove cases and keep cases in the beginning of a sentence
+
+        Parameters
+        ----------
+        sent: spacy
+            The spacy question that needs to be modified
+        TYPE : str
+            The question type used to deal with lowercasing
+        Returns
+        -------
+        """
+        question_tokens = []
+        for token in sent:
+            text = token.text_with_ws
+
+            if TYPE == BINARY and token.i == 1 and token.pos_ != "PROPN":
+                text = text.lower()
+
+            if TYPE != BINARY and token.i == 0 and token.pos_ != "PROPN":
+                text = text.lower()
+
+            question_tokens.append(text)
+
+        return ''.join(question_tokens)
 
     def generateQuestions(self):
         """Method that handles generating questions for each sentence in our corpus
@@ -309,7 +350,44 @@ class Ask:
             self.generateWhAux(sent)
             self.generateBinary(sent)
             self.generateWhen(sent)
-            # self.generateWhere(sent) # this method is not completed yet
+            # self.generateWhere(sent)  # this method is not completed yet
+
+    def score_questions(self):
+        """Method that will score questions and sort them in a list of dict
+
+        Parameters
+        ----------
+        Returns
+        -------
+        generatedQuestions : dict
+            Dictionary of question types and questions
+        """
+        generatedQuestions = {}
+        for q_type, questions in self.questionsGenerated.items():
+            scored_questions = {}
+            for q in questions:
+                current_score = 0
+                # currently score is calculated by -length of question
+                current_score += 0
+
+                if len(q) < 200 and len(q) > 100:
+                    current_score += 12
+                elif len(q) <= 100 and len(q) > 50:
+                    current_score += 10
+                elif len(q) <= 50:
+                    current_score += 8
+                else:
+                    current_score += 5
+
+                scored_questions[q] = current_score
+
+            sorted_by_score = sorted(
+                scored_questions.items(), key=lambda x: x[1])
+
+            final_sorted_questions = [q[0] for q in sorted_by_score]
+            generatedQuestions[q_type] = final_sorted_questions
+
+        return generatedQuestions
 
     def chooseNQuestions(self):
         """Method that handles last part in the pipeline. Randomly picks question type
@@ -320,37 +398,40 @@ class Ask:
         Returns
         -------
         """
-        question_types = list(self.questionsGenerated.keys())
-        while self.nquestions > 0:
-            noMoreQuestions = False
-            for i in range(len(question_types)):
-                wh = question_types[i]
-                if len(self.questionsGenerated[wh]) > 1:
-                    break
-                # no questions
-                elif i == len(question_types) - 1 and len(self.questionsGenerated[wh]) == 0:
-                    noMoreQuestions = True
-                    break                    
+        generatedQuestions = self.score_questions()
+        # score questions and sort them in order
 
-            if noMoreQuestions:
-                #print("Unable to generate more questions")
+        question_types = list(self.questionsGenerated.keys())
+        printed_questions = set()
+        while self.nquestions > 0:
+
+            if len(question_types) == 0:
+                print("Unable to generate more questions")
                 break
+
+            current_question_type = random.choice(question_types)
+            current_questions_set = generatedQuestions[current_question_type]
+
+            if len(current_questions_set) <= 0:
+                generatedQuestions.pop(
+                    current_question_type, None)
+                question_types.remove(current_question_type)
             else:
-                current_question_type = random.choice(question_types)
-                current_questions_set = self.questionsGenerated[current_question_type]
-                if not len(current_questions_set):
-                    self.questionsGenerated.pop(current_question_type, None)
-                    question_types.remove(current_question_type)
+                pick_question = current_questions_set.pop()
+
+                find_similar_questions = process.extract(
+                    pick_question, printed_questions, limit=2)
+
+                if len(find_similar_questions) > 0 and find_similar_questions[0][1] >= 90:
+                    continue
+
                 else:
-                    pick_question = random.sample(current_questions_set, 1)[0]
-                    if len(pick_question) > 100:  # to ensure better quality of questions
-                        current_questions_set.remove(pick_question)
-                        continue
                     print(pick_question)
-                    current_questions_set.remove(pick_question)
+
+                    printed_questions.add(pick_question)
+
                     self.nquestions -= 1
 
-    '''
     def printGeneratedQuestions(self, TYPE=None):
         """Utility method that prints out all the questions based on question type for debugging purposes
         Do not use this method in the file program, this is only for debugging purposes.
@@ -363,13 +444,25 @@ class Ask:
         Returns
         -------
         """
-        print(f"---------- PRINTING {TYPE} QUESTIONS ----------")
         for q_type, questions in self.questionsGenerated.items():
             if TYPE is None or q_type == TYPE:
+                print(f"---------- PRINTING {q_type} QUESTIONS ----------")
                 for q in questions:
                     if q is not None and q != "":
                         print(q)
-    '''
+                        # print(process.extract(q, questions, limit=2))
+
+    def print_token(self, token):
+        """Utility method that prints out information for a spacy token used to debug
+
+        Parameters
+        ----------
+        token : spacy token
+        Returns
+        -------
+        """
+        print(
+            f"{token.text:<20}{token.pos_:<20}{token.dep_:<20}{token.head.text:<20}{token.head.dep_:<20}")
 
 
 if __name__ == "__main__":
@@ -382,8 +475,10 @@ if __name__ == "__main__":
     ask.preprocess()
 
     ask.generateQuestions()
+    # ask.printGeneratedQuestions(BINARY)
     # ask.printGeneratedQuestions(WHAT)
     # ask.printGeneratedQuestions(WHO)
     # ask.printGeneratedQuestions(WHERE)
     # ask.printGeneratedQuestions(WHEN)
+    # ask.printGeneratedQuestions()  # prints all questions in self.questionsGenerated
     ask.chooseNQuestions()

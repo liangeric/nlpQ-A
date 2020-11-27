@@ -9,7 +9,9 @@ dependencies:
   - spacy
   - pip
   - pip:
-    - "https://github.com/explosion/spacy-models/releases/download/en_core_web_md-2.3.1/en_core_web_md-2.3.1.tar.gz"
-    - "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.3.1/en_core_web_lg-2.3.1.tar.gz"
-    - transformers
-    - sentence-transformers
+      - "https://github.com/explosion/spacy-models/releases/download/en_core_web_md-2.3.1/en_core_web_md-2.3.1.tar.gz"
+      - "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.3.1/en_core_web_lg-2.3.1.tar.gz"
+      - transformers
+      - sentence-transformers
+      - python-Levenshtein
+      - fuzzywuzzy
