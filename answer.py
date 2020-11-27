@@ -49,9 +49,9 @@ class Answer:
         #self.model = AutoModelForQuestionAnswering.from_pretrained(
         #    "deepset/bert-base-cased-squad2")
         self.tokenizer = AutoTokenizer.from_pretrained(
-            "bert-large-uncased-whole-word-masking-finetuned-squad")
+            "bert-large-cased-whole-word-masking-finetuned-squad")
         self.model = AutoModelForQuestionAnswering.from_pretrained(
-            "bert-large-uncased-whole-word-masking-finetuned-squad")
+            "bert-large-cased-whole-word-masking-finetuned-squad")
 
     def preprocess(self):
         """[preprocess the corpus and create spacy objects for corpus and questions]
