@@ -203,7 +203,7 @@ class Answer:
 
     def answerQuestion(self, orgQuestion, orgAnswer):
         """
-        Some BERT Function by Eric Liang
+        BERT Function by Eric Liang to extract appropriate answer from a sentence
         """
         # encode and get best possible answer from sentence
         inputs = self.tokenizer.encode_plus(
