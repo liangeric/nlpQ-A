@@ -10,6 +10,7 @@ import random
 import numpy as np
 import spacy
 
+
 from fuzzywuzzy import process
 
 from parse import Parse
@@ -139,12 +140,22 @@ class Ask:
         question = ""
         for token in sent:
             # self.print_token(token)
-            if token.pos_ == "AUX" and token.dep_ == "ROOT":
-                question_word = token.text.capitalize()
-                question_body = ''.join(
-                    t.text_with_ws for t in self.spacyCorpus[sent.start:sent.end-1] if t.i != token.i)
-                question = f"{question_word} {question_body}"
-                break
+            if token.pos_ == "AUX" and token.dep_ in ["ROOT", "ccomp"]:
+                for child in token.children:
+                    if child.dep_ == "nsubj":
+                        child_subtree = list(child.subtree)
+                        if len(child_subtree) > 0:
+                            first, last = child_subtree[0], child_subtree[-1]
+                            subj = ''.join(
+                                t.text_with_ws for t in self.spacyCorpus[first.i: last.i + 1])
+
+                            question_word = token.text.capitalize()
+                            question_body = subj + \
+                                ''.join(
+                                    t.text_with_ws for t in self.spacyCorpus[token.i + 1: sent.end-1])
+
+                            question = f"{question_word} {question_body}"
+                            break
 
         self.addQuestionToDict(question, BINARY)
 
