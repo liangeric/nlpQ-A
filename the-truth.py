@@ -1,8 +1,3 @@
-'''
-Class that will return a set of answers based on given question text
-Command: ./answer article.txt questions.txt
-Python command: python answer.py article.txt questions.txt
-'''
 
 import re
 import sys
@@ -33,14 +28,13 @@ WHERE = "WHERE"
 WHY = "WHY"
 HOW = "HOW"
 WHICH = "WHICH"
-BINARY = set(["IS", "AM", "ARE", "WAS", "WERE", "BE", "BEING", "BEEN", "CAN", "COULD", "DO", "DOES", "DID", "HAS", "HAVE", "HAD", "HAVING", "MAY", "MIGHT", "MUST", "OUGHT", "SHALL", "SHOULD", "WILL", "WOULD"])
+BINARY = "BINARY"
 
 
 class Answer:
     def __init__(self, article, questions):
         self.article = article
         self.questions = questions
-
         self.nlp = spacy.load("en_core_web_lg")  # spacy model
 
         # read in BERT model and tokenizer
@@ -48,6 +42,7 @@ class Answer:
             "deepset/bert-base-cased-squad2")
         self.model = AutoModelForQuestionAnswering.from_pretrained(
             "deepset/bert-base-cased-squad2")
+
 
     def preprocess(self):
         """[preprocess the corpus and create spacy objects for corpus and questions]
@@ -91,27 +86,21 @@ class Answer:
             newQuestion.spacyDoc = self.nlp(question)
 
             # Remove the question word, categorize the question, and get its vector with sentence Transformer
-            question_words = question.split(" ")
-            question_word_found = False
-            for word_i in range(len(question_words)):
-                word = question_words[word_i]
-                if word_i == 0 and word in BINARY:
-                    newQuestion.question_type = BINARY
+            for word in question.split(" "):
+
+                # If word in qWords, we have found the question class, and dont add to parsedQ
+                # This does not solve the issues with 'can you repeat what elmo said?'
+                if word.upper() in qWords:
+                    newQuestion.question_type = word.upper()
                     continue
-                
-                if newQuestion.question_type is None:
-                    
-                    # If word in qWords, we have found the question class, and dont add to parsedQ
-                    if word.upper() in qWords:
-                        newQuestion.question_type = word.upper()
-                        continue
                 parsedQ.append(word)
 
             # If the question_type was not set, it means lacks a question word, therefore should be Binary/other
             if newQuestion.question_type is None:
-                newQuestion.question_type = "BINARY"
+                newQuestion.question_type = BINARY
             # Now we join all of the word back together
             newQuestion.parsed_version = " ".join(parsedQ)
+            # print(newQuestion.parsed_version)
 
             newQuestion.sent_vector = model.encode(newQuestion.parsed_version)
             parsedQuestions.append(newQuestion)
@@ -157,7 +146,7 @@ class Answer:
         # assert(len(sentence_embeddings) == len(list(doc.sents)))
         return sentence_embeddings
 
-    def similarity(self, distFunc=cosine, k=3, model=None):
+    def similarity(self, distFunc=cosine, k=15, model=None):
         """
         Runs the input distance function on all of the questions and compares with the corpus.
         Add in the corpus spacy objects into the .anwsers attribute
@@ -168,7 +157,6 @@ class Answer:
             [Question Objects]: list of the question objects
         """
         #TODO: need to check if the k is below the length of the wikipedia corpus lol
-
         qWords = set([WHAT, WHEN, WHO, WHERE, WHY, HOW, WHICH])
 
         if model is None:
@@ -209,120 +197,35 @@ class Answer:
         correct_tokens = self.tokenizer.convert_ids_to_tokens(
             inputs["input_ids"][0][answer_start:answer_end])
         return self.tokenizer.convert_tokens_to_string(correct_tokens)
-    
-    def answerBin(self, answerSent, simScore, qobj):
-        questionNeg = 0 # , self.nlp(question)   # start by  assuming the question is not negated
-        # debugPrint(type(question))
-        # debugPrint([tok.text + " " + tok.dep_ for tok in questionDoc])
-        for t in qobj.spacyDoc:
-            # debugPrint(t.text)
-            if t.dep_ == "neg":
-                questionNeg = 1
-
-        # debugPrint("the question negation is {}".format(questionNeg))
-        if simScore < 0.35:  # If the similarity is really low we should just drop
-            print("Answer Not Found")
-            return
-        ansDoc, ans = self.nlp(answerSent), None
-        for token in ansDoc:
-            #print(token.text, token.dep_, token.head.text, token.head.pos_)
-            if token.dep_ == "ROOT":
-                # print("Found Root, it is", token.text)
-                for child in token.children:
-                    # print(child.text)
-                    if child.head.pos_ == "AUX" and child.dep_ == "neg":
-                        ans = 0
-                        break
-                ans = 1
-                break
-        if questionNeg:
-            if ans:
-                print("No")
-            else:
-                print("Yes")
-        else:
-            if ans:
-                print("Yes")
-            else:
-                print("No")
-        return 
 
 
 if __name__ == "__main__":
     s = time.time()
-    article, questions = sys.argv[1], sys.argv[2]
+    article, questions = "data/set3/a9.txt", "data/set3/q9.txt"
 
     article = open(article, "r", encoding="UTF-8").read()
     questions = open(questions, "r", encoding="UTF-8").read()
-
+    
     answer = Answer(article, questions)
     answer.preprocess()
 
-    # Run the processing to return back a list of question objects
-    # roberta-base-nli-stsb-mean-tokens pretrain semantic textual similarity model
-    # distilbert-base-nli-stsb-mean-token also pretrain STS
-    # distilroberta-base-msmarco-v2 pretrain for information retrival and 
-    qsObjLst = answer.similarity(model="distilroberta-base-msmarco-v2")
-    # qsObjLst = answer.similarity(model="roberta-base-nli-stsb-mean-tokens")
 
-    # print statements used to debug preprocessing and similarity matching
-    """
-    for qObj in qsObjLst:
-        print("Question: {} TYPE: {}".format(qObj.raw_question, qObj.question_type))
-        print("Named Entity: {}".format([ent for ent in qObj.spacyDoc.ents]), "\n")
-        for i in range(len(qObj.answers)):
-            print("Answer {}: {}".format(i, qObj.answers[i]))
-            print("Named Entities: {}".format([ent for ent in qObj.answers[i].ents]), "\n")
-        print("\n")
-    """
+    qsObjLst = answer.similarity(model="distilroberta-base-msmarco-v2")
 
     qIdx = 0
     for qObj in qsObjLst:
         # Get question
         orgQuestion = qObj.raw_question
-
         debugPrint("Question {}: {}".format(qIdx, orgQuestion))
-        debugPrint(qObj.question_type)
-
-        for i in range(len(qObj.answers)):
-            # Get answer
-            orgAnswer = qObj.answers[i]
-            debugPrint("Answer {}: {} \nCOS SCORE: {}".format(i, orgAnswer, qObj.score[i]))
-
-            # debugPrint("Found Answer:")
-            foundAnswer = answer.answerQuestion(orgQuestion, orgAnswer)
-            if foundAnswer != "[CLS]" and foundAnswer.strip() != "":
-                if qObj.question_type == "BINARY":
-                    answer.answerBin(foundAnswer, qObj.score[i], qObj)
-                    break  # We break since we have answered this question
-                debugPrint("BERT ANSWER", end=": ")
-                print(foundAnswer)
-                break
-            elif i == len(qObj.answers)-1:
-                debugPrint("BERT ANSWER", end=": ")
-                print("Answer not found!")
-            debugPrint("\n")
+        orgAnswer = ""
+        for sent in qObj.answers:
+            orgAnswer = orgAnswer + str(sent) + " "
+        print(orgAnswer)
+        foundAnswer = answer.answerQuestion(orgQuestion, orgAnswer)
+        print(foundAnswer)
+                
 
         debugPrint("\n")
         qIdx += 1
     e = time.time()
     debugPrint(f"Answering took {e-s} Seconds")
-
-
-    # Used for manual unit testing of a case
-    """
-    orgAnswer = "Pittsburgh was named in 1758 by General John Forbes, in honor of British statesman William Pitt, 1st Earl of Chatham."
-    orgQuestion = "When was Pittsburgh named by General John Forbes, in honor of British statesman William Pitt, 1st Earl of Chatham?"
-    print(answer.answerQuestion(orgQuestion, orgAnswer))
-    orgQuestion = "What was named in 1758 by General John Forbes?"
-    print(answer.answerQuestion(orgQuestion, orgAnswer))
-    orgQuestion = "Who named Pittsburgh in 1758?"
-    print(answer.answerQuestion(orgQuestion, orgAnswer))
-    orgQuestion = "In honor of whom was Pittsburgh named in 1758 by General John Forbes?"
-    print(answer.answerQuestion(orgQuestion, orgAnswer))
-
-    orgAnswer = "The first is called the Meidum pyramid, named for its location in Egypt first."
-    orgQuestion = "Who was the first Pharaoh of the Old Kingdom?"
-    print(answer.answerQuestion(orgQuestion, orgAnswer))
-    """
-
