@@ -219,7 +219,7 @@ class Ask:
                 if token.text not in whereKeyWords:
                     continue
                 head_token = token.head
-                print("start head children ------")
+                print("------ start head children ------")
                 for child in head_token.children:
                     self.print_token(child)
                     if child.dep_ == "nsubj":
@@ -232,9 +232,10 @@ class Ask:
                         q = token.head.text_with_ws + nsubj
                         self.addQuestionToDict(q, WHERE)
 
-                print("end head children ------")
+                print("------ end head children ------")
 
-                prepositionalPhrase = ' '.join([t.text for t in token.subtree])
+                prepositionalPhrase = ''.join(
+                    [t.text_with_ws for t in token.subtree])
                 listOfPrepositions.append(prepositionalPhrase)
 
     def generateWho(self, sent):
@@ -353,11 +354,11 @@ class Ask:
         -------
         """
         for sent in self.spacyCorpus.sents:
-            # self.generateWhat(sent)
-            # self.generateWho(sent)
-            # self.generateWhAux(sent)
+            self.generateWhat(sent)
+            self.generateWho(sent)
+            self.generateWhAux(sent)
             self.generateBinary(sent)
-            # self.generateWhen(sent)
+            self.generateWhen(sent)
             # self.generateWhere(sent)  # this method is not completed yet
 
     def score_questions(self):
