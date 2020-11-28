@@ -33,7 +33,7 @@ WHERE = "WHERE"
 WHY = "WHY"
 HOW = "HOW"
 WHICH = "WHICH"
-BINARY = "BINARY"
+BINARY = set(["IS", "AM", "ARE", "WAS", "WERE", "BE", "BEING", "BEEN", "CAN", "COULD", "DO", "DOES", "DID", "HAS", "HAVE", "HAD", "HAVING", "MAY", "MIGHT", "MUST", "OUGHT", "SHALL", "SHOULD", "WILL", "WOULD"])
 
 
 class Answer:
@@ -42,6 +42,7 @@ class Answer:
         self.questions = questions
 
         self.nlp = spacy.load("en_core_web_lg")  # spacy model
+
 
         # # read in BERT model and tokenizer
         # self.tokenizer = AutoTokenizer.from_pretrained(
@@ -63,32 +64,6 @@ class Answer:
         # print(self.questions)
         self.spacyCorpus = self.nlp(self.corpus)
         # self.spacyQuestions = self.nlp(self.questions)
-
-    # depreciated
-    def getAverageVector(self, doc, excludeTokens=None):
-        """[get the average vectors for a given doc]
-        Args:
-            doc ([spacy]): [spacy model from text]
-            excludeTokens ([set], optional): [tokens to exclude]. Defaults to None.
-        Returns:
-            [list]: [avg]
-        """
-        avg = []
-        for sentence in doc.sents:
-            # This value is hardcoded from the Spacy Word2Vec model
-            accum = np.zeros((300,))
-            for word in sentence:
-
-                # if given excludeTokens, skip word if it's in excludeTokens
-                if excludeTokens is not None and word in excludeTokens:
-                    continue
-
-                if not word.is_stop:
-                    accum += word.vector
-
-            avg.append(accum / len(sentence))
-
-        return avg
 
     def questionProcessing(self, qWords=None, model=None):
         """ Specialized parsing for the questions. 
@@ -119,21 +94,27 @@ class Answer:
             newQuestion.spacyDoc = self.nlp(question)
 
             # Remove the question word, categorize the question, and get its vector with sentence Transformer
-            for word in question.split(" "):
-
-                # If word in qWords, we have found the question class, and dont add to parsedQ
-                # This does not solve the issues with 'can you repeat what elmo said?'
-                if word.upper() in qWords:
-                    newQuestion.question_type = word.upper()
+            question_words = question.split(" ")
+            question_word_found = False
+            for word_i in range(len(question_words)):
+                word = question_words[word_i]
+                if word_i == 0 and word in BINARY:
+                    newQuestion.question_type = BINARY
                     continue
+                
+                if newQuestion.question_type is None:
+                    
+                    # If word in qWords, we have found the question class, and dont add to parsedQ
+                    if word.upper() in qWords:
+                        newQuestion.question_type = word.upper()
+                        continue
                 parsedQ.append(word)
 
             # If the question_type was not set, it means lacks a question word, therefore should be Binary/other
             if newQuestion.question_type is None:
-                newQuestion.question_type = BINARY
+                newQuestion.question_type = "BINARY"
             # Now we join all of the word back together
             newQuestion.parsed_version = " ".join(parsedQ)
-            # print(newQuestion.parsed_version)
 
             newQuestion.sent_vector = model.encode(newQuestion.parsed_version)
             parsedQuestions.append(newQuestion)
@@ -189,6 +170,7 @@ class Answer:
         Returns:
             [Question Objects]: list of the question objects
         """
+        #TODO: need to check if the k is below the length of the wikipedia corpus lol
 
         qWords = set([WHAT, WHEN, WHO, WHERE, WHY, HOW, WHICH])
 
@@ -219,7 +201,7 @@ class Answer:
 
     def answerQuestion(self, orgQuestion, orgAnswer):
         """
-        Some BERT Function by Eric Liang
+        BERT Function by Eric Liang to extract appropriate answer from a sentence
         """
         # encode and get best possible answer from sentence
         inputs = self.tokenizer.encode_plus(
@@ -230,6 +212,43 @@ class Answer:
         correct_tokens = self.tokenizer.convert_ids_to_tokens(
             inputs["input_ids"][0][answer_start:answer_end])
         return self.tokenizer.convert_tokens_to_string(correct_tokens)
+    
+    def answerBin(self, answerSent, simScore, qobj):
+        questionNeg = 0 # , self.nlp(question)   # start by  assuming the question is not negated
+        # debugPrint(type(question))
+        # debugPrint([tok.text + " " + tok.dep_ for tok in questionDoc])
+        for t in qobj.spacyDoc:
+            # debugPrint(t.text)
+            if t.dep_ == "neg":
+                questionNeg = 1
+
+        # debugPrint("the question negation is {}".format(questionNeg))
+        if simScore < 0.35:  # If the similarity is really low we should just drop
+            print("Answer Not Found")
+            return
+        ansDoc, ans = self.nlp(answerSent), None
+        for token in ansDoc:
+            #print(token.text, token.dep_, token.head.text, token.head.pos_)
+            if token.dep_ == "ROOT":
+                # print("Found Root, it is", token.text)
+                for child in token.children:
+                    # print(child.text)
+                    if child.head.pos_ == "AUX" and child.dep_ == "neg":
+                        ans = 0
+                        break
+                ans = 1
+                break
+        if questionNeg:
+            if ans:
+                print("No")
+            else:
+                print("Yes")
+        else:
+            if ans:
+                print("Yes")
+            else:
+                print("No")
+        return 
 
     def answerBin(self, answerSent, simScore, qobj):
         """
@@ -277,6 +296,7 @@ class Answer:
             else:
                 print("No")
 
+
 def ensembleModel(qObjListA, qObjListB):
     """
     Ensemble idea to pick top-k from the model that has a higher cosine score. 
@@ -293,6 +313,7 @@ def ensembleModel(qObjListA, qObjListB):
         # Get question
         qObj = qsObjLst_marco[obj_idx]
         orgQuestion = qObj.raw_question
+
         debugPrint("Question {}: {}".format(qIdx, qObj.raw_question))
         debugPrint(qObj.question_type)
 
@@ -336,6 +357,7 @@ def ensembleModel(qObjListA, qObjListB):
                 elif i == len(qObj.answers)-1:
                     debugPrint("BERT ANSWER", end=": ")
                     print("Answer not found!")
+
             debugPrint("\n")
 
         debugPrint("\n")
