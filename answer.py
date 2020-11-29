@@ -19,6 +19,8 @@ from distUtils import cosine, diceSim, jaccardSim, scipyJaccard
 from parse import Parse
 from question import Question
 
+
+
 # If false the log function will not print
 DEBUG = True
 
@@ -34,6 +36,7 @@ WHY = "WHY"
 HOW = "HOW"
 WHICH = "WHICH"
 BINARY = "BINARY"
+
 
 class Answer:
     def __init__(self, article, questions):
@@ -302,13 +305,17 @@ class Answer:
         # Parsing the answer, for negations of the root verb
         ansDoc, ans = self.nlp(answerSent), None
         for token in ansDoc:
+            if token.dep_ == "neg" or token.text == "not" or token.text == "no":
+                ans = 0
             if token.dep_ == "ROOT":
                 for child in token.children:
-                    if child.head.pos_ == "AUX" and child.dep_ == "neg":
+                    if child.dep_ == "neg":
                         ans = 0
                         break
+                if ans == 0:
+                    break
+            if ans is None:
                 ans = 1
-                break
 
         # print answer as is if question is not negated. If question is negated invert answer
         if questionNeg:
@@ -341,6 +348,7 @@ def ensembleModel(qObjListA, qObjListB):
         orgQuestion = qObj.raw_question
 
         debugPrint("Question {}: {}".format(qIdx, qObj.raw_question))
+        debugPrint(qObj.question_type)
         for i in range(len(qObj.answers)):
 
             qObj = qsObjLst_marco[obj_idx]
@@ -351,6 +359,19 @@ def ensembleModel(qObjListA, qObjListB):
             robertaScore = qObj.score[i]
             orgAnswer_roberta = qObj.answers[i]
 
+            if robertaScore and marcoScore < 0.31:
+                debugPrint("Answers below the cutoff")
+                # debugPrint(f"Marco Score: {marcoScore}, Roberta Score: {robertaScore}")
+                debugPrint("Marco Answer")
+                debugPrint("Answer {}: {} \nCOS SCORE: {}".format(i, orgAnswer_marco,  marcoScore))
+                debugPrint("Roberta Answer:\nAnswer {}: {} \nCOS SCORE: {}".format(i, orgAnswer_roberta, robertaScore))
+
+                print("Answer not found!")
+                break
+
+            # debugPrint(f"{i} \t Marco: Score:{marcoScore}\n Answer: {orgAnswer_marco}")
+            # debugPrint(f"{i} \t Roberta: Score:{robertaScore}\n Answer: {orgAnswer_roberta}")
+
             if robertaScore < marcoScore:
                 debugPrint("Marco was chosen")
                 debugPrint("Answer {}: {} \nCOS SCORE: {}".format(i, orgAnswer_marco,  marcoScore))
@@ -358,6 +379,7 @@ def ensembleModel(qObjListA, qObjListB):
                 foundAnswer = answer.answerQuestion(orgQuestion, orgAnswer_marco)
                 if foundAnswer != "[CLS]" and foundAnswer.strip() != "":
                     if qObj.question_type == "BINARY":
+                        debugPrint(f"Bert Answer (Input to Binary): {foundAnswer}")
                         answer.answerBin(foundAnswer, qObj.score[i], qObj)
                         break  # We break since we have answered this question
                     debugPrint("BERT ANSWER", end=": ")
@@ -373,6 +395,7 @@ def ensembleModel(qObjListA, qObjListB):
                 foundAnswer = answer.answerQuestion(orgQuestion, orgAnswer_roberta)
                 if foundAnswer != "[CLS]" and foundAnswer.strip() != "":
                     if qObj.question_type == "BINARY":
+                        debugPrint(f"Bert Answer (Input to Binary): {foundAnswer}")
                         answer.answerBin(foundAnswer, qObj.score[i], qObj)
                         break  # We break since we have answered this question
                     debugPrint("BERT ANSWER", end=": ")

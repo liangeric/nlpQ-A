@@ -9,9 +9,12 @@ import random
 
 import numpy as np
 import spacy
+import time 
 
 from parse import Parse
 
+def debugPrint(s, **kwargs):
+    if DEBUG: print(s, **kwargs)
 
 WHAT = "What"
 WHEN = "When"
@@ -373,6 +376,7 @@ class Ask:
 
 
 if __name__ == "__main__":
+    s = time.time()
     article, nquestions = sys.argv[1], sys.argv[2]
 
     article = open(article, "r", encoding="UTF-8").read()
@@ -387,3 +391,5 @@ if __name__ == "__main__":
     # ask.printGeneratedQuestions(WHERE)
     # ask.printGeneratedQuestions(WHEN)
     ask.chooseNQuestions()
+    e = time.time()
+    debugPrint(f"Question asking took {e-s}")
