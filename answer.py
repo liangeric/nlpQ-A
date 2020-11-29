@@ -35,9 +35,7 @@ WHERE = "WHERE"
 WHY = "WHY"
 HOW = "HOW"
 WHICH = "WHICH"
-BINARY = set(["IS", "AM", "ARE", "WAS", "WERE", "BE", "BEING", "BEEN", "CAN",
- "COULD", "DO", "DOES", "DID", "HAS", "HAVE", "HAD", "HAVING", "MAY", "MIGHT",
- "MUST", "OUGHT", "SHALL", "SHOULD", "WILL", "WOULD"])
+BINARY = "BINARY"
 
 
 class Answer:
@@ -55,6 +53,8 @@ class Answer:
         #     "deepset/bert-base-cased-squad2")
         self.tokenizer = AutoTokenizer.from_pretrained("bert-large-cased-whole-word-masking-finetuned-squad")
         self.model = AutoModelForQuestionAnswering.from_pretrained("bert-large-cased-whole-word-masking-finetuned-squad")
+        self.qWords = set([WHAT, WHEN, WHO, WHERE, WHY, HOW, WHICH, "WHOSE", "WHOM"])
+        self.binWords = set(["IS", "AM", "ARE", "WAS", "WERE", "BE", "BEING", "BEEN", "CAN", "COULD", "DO", "DOES", "DID", "HAS", "HAVE", "HAD", "HAVING", "MAY", "MIGHT", "MUST", "OUGHT", "SHALL", "SHOULD", "WILL", "WOULD"])
 
     def preprocess(self):
         """[preprocess the corpus and create spacy objects for corpus and questions]
@@ -90,36 +90,63 @@ class Answer:
             # If the sentence is all whitespace go next, mostly for blank end lines
             if question.isspace() or len(question) == 0:
                 continue
+            question = question.strip()
             # Initialize Question Class Object, and start storing information
             parsedQ, newQuestion = [], Question()
             # adding it back, since we split on it
             newQuestion.raw_question = question + "?"
             # Create the spacy doc on this single question
             newQuestion.spacyDoc = self.nlp(question)
-
-            # Remove the question word, categorize the question, and get its vector with sentence Transformer
-            question_words = question.split(" ")
-            question_word_found = False
-            for word_i in range(len(question_words)):
-                word = question_words[word_i]
-                if word_i == 0 and word in BINARY:
-                    newQuestion.question_type = BINARY
-                    continue
-                
-                if newQuestion.question_type is None:
+            root_i = 0
+            rem_word = ""
+            question_tok = [token.text for token in newQuestion.spacyDoc]
+            #first word is wh question word
+            if question_tok[0].upper() in self.qWords:
+                newQuestion.question_type = question_tok[0].upper()
+                rem_word = question_tok[0]
+            reverse_q = False
+            #subordinating conjunction / binary
+            if newQuestion.question_type in set([WHEN, WHERE, None]):
+                punct_found = False
+                for token_i in range(len(newQuestion.spacyDoc)):
+                    token = newQuestion.spacyDoc[token_i]
+                    if token.dep_ == "punct":
+                        punct_found = True
                     
-                    # If word in qWords, we have found the question class, and dont add to parsedQ
-                    if word.upper() in qWords:
-                        newQuestion.question_type = word.upper()
+                    if token.dep_ == "ROOT":
+                        root_i = token_i
+                        #reclassify for punct
+                        
+                        #wh question
+                        if punct_found:
+                            newQuestion.question_type = None
+                            for child in token.children:
+                                if child.text.upper() in self.qWords:
+                                    newQuestion.question_type = child.text.upper()
+                                    rem_word = child.text
+                                    break
+                        #binary
+                        elif root_i > 0 and newQuestion.spacyDoc[root_i - 1].dep_ == "punct":
+                            rem_word = ""
+                            newQuestion.question_type = BINARY
+                            reverse_q = True
+                        break
+            if newQuestion.question_type == None:
+                rem_word = ""
+                newQuestion.question_type = BINARY
+
+                 
+            # reverse the question for subordinating conjuction cases
+            if reverse_q:
+                    parsedQ = question_tok[root_i + 1:] + question_tok[:root_i - 1]
+            else: #if newQuestion.question_type.upper() in self.qWords or binary but don't reverse it
+                for word in question_tok:
+                    if word == rem_word:
                         continue
-                parsedQ.append(word)
-
-            # If the question_type was not set, it means lacks a question word, therefore should be Binary/other
-            if newQuestion.question_type is None:
-                newQuestion.question_type = "BINARY"
-            # Now we join all of the word back together
+                    parsedQ.append(word)
+                
+                
             newQuestion.parsed_version = " ".join(parsedQ)
-
             newQuestion.sent_vector = model.encode(newQuestion.parsed_version)
             parsedQuestions.append(newQuestion)
 
@@ -176,14 +203,12 @@ class Answer:
         """
         #TODO: need to check if the k is below the length of the wikipedia corpus lol
 
-        qWords = set([WHAT, WHEN, WHO, WHERE, WHY, HOW, WHICH])
-
         if model is None:
-            qs = self.questionProcessing(qWords, model="distilbert-base-nli-stsb-mean-token")
+            qs = self.questionProcessing(self.qWords, model="distilbert-base-nli-stsb-mean-token")
             # Run corpus parsing, with the spacy doc object. Return a 2D numpy array, (numSents, len(sentVec))
             cs = self.corpusVector(self.spacyCorpus, model="distilbert-base-nli-stsb-mean-token")
         else:
-            qs = self.questionProcessing(qWords, model=model)
+            qs = self.questionProcessing(self.qWords, model=model)
             cs = self.corpusVector(self.spacyCorpus, model=model)
         # For every question
         for i in range(len(qs)):
@@ -323,9 +348,7 @@ def ensembleModel(qObjListA, qObjListB):
         orgQuestion = qObj.raw_question
 
         debugPrint("Question {}: {}".format(qIdx, qObj.raw_question))
-        # debugPrint("Parsed Question: {}".format(qObj.parsed_version))
         debugPrint(qObj.question_type)
-
         for i in range(len(qObj.answers)):
 
             qObj = qsObjLst_marco[obj_idx]
