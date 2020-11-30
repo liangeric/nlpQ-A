@@ -1,7 +1,7 @@
 '''
 Class that will return a set of questions based on given text
 Command: ./ask article.txt nquestions
-Python command: python answer.py article.txt 21
+Python command: python ask.py article.txt 21
 '''
 
 import sys
