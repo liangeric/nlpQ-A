@@ -9,6 +9,7 @@ import random
 
 import numpy as np
 import spacy
+import time
 
 
 from fuzzywuzzy import process
@@ -22,6 +23,10 @@ WHERE = "Where"
 WHO = "Who"
 BINARY = "Binary"
 
+DEBUG = True
+
+def debugPrint(s, **kwargs):
+    if DEBUG: print(s, **kwargs)
 
 class Ask:
     def __init__(self, article, nquestions):
@@ -376,6 +381,11 @@ class Ask:
             scored_questions = {}
             for q in questions:
                 current_score = 0
+                q_doc = self.nlp(q)
+                ents = [(e.text, e.label_) for e in q_doc.ents]
+                current_score += len(ents) * 1.4
+
+                
                 # currently score is calculated by -length of question
                 current_score += 0
 
@@ -475,6 +485,7 @@ class Ask:
 
 
 if __name__ == "__main__":
+    s = time.time()
     article, nquestions = sys.argv[1], sys.argv[2]
 
     article = open(article, "r", encoding="UTF-8").read()
@@ -491,3 +502,5 @@ if __name__ == "__main__":
     # ask.printGeneratedQuestions(WHEN)
     # ask.printGeneratedQuestions()  # prints all questions in self.questionsGenerated
     ask.chooseNQuestions()
+    e = time.time()
+    debugPrint(f"Tried to generate {nquestions}, took {e-s} seconds")
