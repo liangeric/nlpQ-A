@@ -348,6 +348,11 @@ def ensembleModel(qObjListA, qObjListB):
                         answer.answerBin(foundAnswer, qObj.score[i], qObj)
                         break  # We break since we have answered this question
                     debugPrint("BERT ANSWER", end=": ")
+
+                    # Capitalize first letter in first word
+                    if len(foundAnswer) != 0:
+                        foundAnswer = foundAnswer[0].upper() + foundAnswer[1:]
+
                     print(foundAnswer)
                     break
                 elif i == len(qObj.answers)-1:
@@ -364,6 +369,11 @@ def ensembleModel(qObjListA, qObjListB):
                         answer.answerBin(foundAnswer, qObj.score[i], qObj)
                         break  # We break since we have answered this question
                     debugPrint("BERT ANSWER", end=": ")
+
+                    # Capitalize first letter in first word
+                    if len(foundAnswer) != 0:
+                        foundAnswer = foundAnswer[0].upper() + foundAnswer[1:]
+
                     print(foundAnswer)
                     break
                 elif i == len(qObj.answers)-1:
