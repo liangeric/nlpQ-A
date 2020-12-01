@@ -305,12 +305,17 @@ class Ask:
             if token.ent_type_ in ner:
                 head = token.head
                 if head.pos_ in verbs and head.dep_ == "ROOT":
+                    questionType = WHAT
 
-                    questions.append(
-                        ''.join(t.text_with_ws for t in self.spacyCorpus[head.i:sent.end-1]))
+                    q = ''.join(t.text_with_ws for t in self.spacyCorpus[head.i:sent.end-1])
 
-        for q in questions:
-            self.addQuestionToDict(q, WHAT)
+                    qLower = q.lower()
+                    tempSplit = qLower.split(" ")
+
+                    if "he" in tempSplit or "she" in tempSplit:
+                        questionType = WHO
+
+                    self.addQuestionToDict(q,questionType)
 
     def addQuestionToDict(self, question, TYPE):
         """Method that adds a particular question to the dict based on question type
