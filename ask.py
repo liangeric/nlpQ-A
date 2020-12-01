@@ -1,7 +1,7 @@
 '''
 Class that will return a set of questions based on given text
 Command: ./ask article.txt nquestions
-Python command: python answer.py article.txt 21
+Python command: python ask.py article.txt 21
 '''
 
 import sys
@@ -10,6 +10,7 @@ import copy
 
 import numpy as np
 import spacy
+import time
 
 import time
 
@@ -24,6 +25,13 @@ WHEN = "When"
 WHERE = "Where"
 WHO = "Who"
 BINARY = "Binary"
+
+DEBUG = True
+
+
+def debugPrint(s, **kwargs):
+    if DEBUG:
+        print(s, **kwargs)
 
 
 class Ask:
@@ -382,6 +390,9 @@ class Ask:
 
         while number_sentences_seen < 200:
 
+            if len(corpus_sents_index) <= 0:
+                break
+
             sent_index = random.choice(corpus_sents_index)
 
             sent_start = sent_start_end[sent_index]["start"]
@@ -414,6 +425,10 @@ class Ask:
             scored_questions = {}
             for q in questions:
                 current_score = 0
+                q_doc = self.nlp(q)
+                ents = [(e.text, e.label_) for e in q_doc.ents]
+                current_score += len(ents) * 1.4
+
                 # currently score is calculated by -length of question
                 current_score += 0
 
