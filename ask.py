@@ -425,12 +425,6 @@ class Ask:
             scored_questions = {}
             for q in questions:
                 current_score = 0
-                q_doc = self.nlp(q)
-                ents = [(e.text, e.label_) for e in q_doc.ents]
-                current_score += len(ents) * 1.4
-
-                # currently score is calculated by -length of question
-                current_score += 0
 
                 if len(q) < 200 and len(q) > 100:
                     current_score += 12
@@ -477,7 +471,6 @@ class Ask:
                     if self.nquestions <= 0:
                         break
 
-                    # current_question_type = random.choice(question_types)
                     current_questions_set = generatedQuestions.get(
                         current_question_type, None)
 
@@ -524,7 +517,6 @@ class Ask:
                 for q in questions:
                     if q is not None and q != "":
                         print(q)
-                        # print(process.extract(q, questions, limit=2))
 
     def print_token(self, token):
         """Utility method that prints out information for a spacy token used to debug
@@ -558,4 +550,4 @@ if __name__ == "__main__":
     # ask.printGeneratedQuestions()  # prints all questions in self.questionsGenerated
     ask.chooseNQuestions()
     e = time.time()
-    print(f"Tried to generate {nquestions}, took {e-s} seconds")
+    debugPrint(f"Tried to generate {nquestions}, took {e-s} seconds")
