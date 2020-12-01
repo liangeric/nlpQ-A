@@ -242,42 +242,7 @@ class Answer:
             inputs["input_ids"][0][answer_start:answer_end])
         return self.tokenizer.convert_tokens_to_string(correct_tokens)
     
-    def answerBin(self, answerSent, simScore, qobj):
-        questionNeg = 0 # , self.nlp(question)   # start by  assuming the question is not negated
-        # debugPrint(type(question))
-        # debugPrint([tok.text + " " + tok.dep_ for tok in questionDoc])
-        for t in qobj.spacyDoc:
-            # debugPrint(t.text)
-            if t.dep_ == "neg":
-                questionNeg = 1
 
-        # debugPrint("the question negation is {}".format(questionNeg))
-        if simScore < 0.35:  # If the similarity is really low we should just drop
-            print("Answer Not Found")
-            return
-        ansDoc, ans = self.nlp(answerSent), None
-        for token in ansDoc:
-            #print(token.text, token.dep_, token.head.text, token.head.pos_)
-            if token.dep_ == "ROOT":
-                # print("Found Root, it is", token.text)
-                for child in token.children:
-                    # print(child.text)
-                    if child.head.pos_ == "AUX" and child.dep_ == "neg":
-                        ans = 0
-                        break
-                ans = 1
-                break
-        if questionNeg:
-            if ans:
-                print("No")
-            else:
-                print("Yes")
-        else:
-            if ans:
-                print("Yes")
-            else:
-                print("No")
-        return 
 
     def answerBin(self, answerSent, simScore, qobj):
         """
