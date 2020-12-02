@@ -19,6 +19,8 @@ from fuzzywuzzy import process
 
 from parse import Parse
 
+random.seed(11411)  # REMOVE THIS
+
 
 WHAT = "What"
 WHEN = "When"
@@ -161,8 +163,8 @@ class Ask:
                             subj = ''.join(
                                 t.text_with_ws for t in self.spacyCorpus[first.i: last.i + 1])
 
-                            question_word = token.text_with_ws.capitalize()
-                            if question_word.lower() not in ['is', 'was', 'are', 'were']:
+                            question_word = token.text.capitalize()
+                            if question_word.strip().lower() not in ['is', 'was', 'are', 'were']:
                                 continue
                             question_body = subj + \
                                 ''.join(
@@ -244,7 +246,6 @@ class Ask:
                 head_token = token.head
 
                 for child in head_token.children:
-                    # self.print_token(child)
                     if child.dep_ in ["nsubj", 'nsubjpass']:
                         hasPROPN = False
                         for t in child.subtree:
@@ -262,8 +263,7 @@ class Ask:
 
                             noun_phrase = noun_phrase if not aux_verb else aux_verb.text_with_ws + noun_phrase
                             question = noun_phrase + head_token.text_with_ws
-                            # print(question,  head_token.text, head_token.lemma_,
-                            #       head_token.pos_, head_token.dep_, token.text, list(token.subtree))
+
                             self.addQuestionToDict(question, WHERE)
 
     def generateWho(self, sent):
@@ -436,13 +436,14 @@ class Ask:
             scored_questions = {}
             for q in questions:
                 current_score = 0
+
                 question_tokens = q.split(" ")
 
-                ideal_number_tokens = 8
+                ideal_number_tokens = 13
+                diff_ideal_tokens = abs(
+                    ideal_number_tokens-len(question_tokens))
 
-                diff_from_ideal = abs(ideal_number_tokens-len(question_tokens))
-
-                current_score -= diff_from_ideal
+                current_score -= (diff_ideal_tokens)
 
                 # if len(q) < 200 and len(q) > 100:
                 #     current_score += 12
