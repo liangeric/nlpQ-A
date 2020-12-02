@@ -77,64 +77,67 @@ class Ask:
         """
 
         for sent in self.spacyCorpus.sents:
-            foundDate, foundEvent = False, False
-            whenQuestions = []
-            for ent in sent.ents:
-                currQuestion, obj = ["When", "[auxVerb]"], None
-                if ent.label_ in set(["DATE"]):
-                    foundDate = True
-            if foundDate:
-                plural = False  # default to singular
-                for chunk in sent.noun_chunks:
-                    if chunk.root.dep_ == "nsubj":
-                        currQuestion.append(chunk.text)
-                        assert(type(chunk.text) == str)
-                        currQuestion.append(chunk.root.head.lemma_)
-                        assert(type(chunk.root.head.lemma_) == str)
-                        rootVerb = chunk.root.head
-                        # plural vs singular
-                        if chunk.root.tag_ == "NNPS" or chunk.root.tag_ == "NNS":
-                            plural = True
-                        tagMap = self.nlp.vocab.morphology.tag_map[chunk.root.head.tag_]
-                        pastTense = False  # default to present tense
-                        if "Tense_past" in tagMap and tagMap["Tense_past"] == True:
-                            pastTense = True
+            try:
+                foundDate, foundEvent = False, False
+                whenQuestions = []
+                for ent in sent.ents:
+                    currQuestion, obj = ["When", "[auxVerb]"], None
+                    if ent.label_ in set(["DATE"]):
+                        foundDate = True
+                if foundDate:
+                    plural = False  # default to singular
+                    for chunk in sent.noun_chunks:
+                        if chunk.root.dep_ == "nsubj":
+                            currQuestion.append(chunk.text)
+                            assert(type(chunk.text) == str)
+                            currQuestion.append(chunk.root.head.lemma_)
+                            assert(type(chunk.root.head.lemma_) == str)
+                            rootVerb = chunk.root.head
+                            # plural vs singular
+                            if chunk.root.tag_ == "NNPS" or chunk.root.tag_ == "NNS":
+                                plural = True
+                            tagMap = self.nlp.vocab.morphology.tag_map[chunk.root.head.tag_]
+                            pastTense = False  # default to present tense
+                            if "Tense_past" in tagMap and tagMap["Tense_past"] == True:
+                                pastTense = True
 
-                    if chunk.root.dep_ == "dobj" and chunk.root.head.text == rootVerb.text:
-                        obj = chunk.text
+                        if chunk.root.dep_ == "dobj" and chunk.root.head.text == rootVerb.text:
+                            obj = chunk.text
 
-                if obj is not None:
-                    currQuestion.append(obj)
-                    assert(type(obj) == str)
-                #  re parse for preposition and the object that relates to it.
-                # for word in sent:
-                #     prep = None
-                #     if word.dep_ == "prep" and word.head.text == rootVerb:
-                #         currQuestion.append((word, "prep"))
-                #         prep = word.text
-                #     if prep is not  None and word.head.text == prep:
-                #         currQuestion.append((word, "pobj"))
-                if rootVerb.lemma_ == "be":
-                    currQuestion = currQuestion[0:-1]
-                    if "[auxVerb]" in currQuestion:
-                        currQuestion.remove("[auxVerb]")
-                    currQuestion.insert(1, rootVerb.text)
-                    assert(type(rootVerb.text) == str)
-                else:
-                    if pastTense:
-                        conjugatedVerb = "did"
-                    else:  # presentTense
-                        if plural:
-                            conjugatedVerb = "do"
-                        else:  # singular
+                    if obj is not None:
+                        currQuestion.append(obj)
+                        assert(type(obj) == str)
+                    #  re parse for preposition and the object that relates to it.
+                    # for word in sent:
+                    #     prep = None
+                    #     if word.dep_ == "prep" and word.head.text == rootVerb:
+                    #         currQuestion.append((word, "prep"))
+                    #         prep = word.text
+                    #     if prep is not  None and word.head.text == prep:
+                    #         currQuestion.append((word, "pobj"))
+                    if rootVerb.lemma_ == "be":
+                        currQuestion = currQuestion[0:-1]
+                        if "[auxVerb]" in currQuestion:
+                            currQuestion.remove("[auxVerb]")
+                        currQuestion.insert(1, rootVerb.text)
+                        assert(type(rootVerb.text) == str)
+                    else:
+                        if pastTense:
                             conjugatedVerb = "did"
+                        else:  # presentTense
+                            if plural:
+                                conjugatedVerb = "do"
+                            else:  # singular
+                                conjugatedVerb = "did"
 
-                    if "[auxVerb]" in currQuestion:
-                        currQuestion.remove("[auxVerb]")
-                    currQuestion.insert(1, conjugatedVerb)
-                if len(currQuestion) > 2:
-                    q = " ".join(currQuestion[1:])
-                    self.addQuestionToDict(q, WHEN)
+                        if "[auxVerb]" in currQuestion:
+                            currQuestion.remove("[auxVerb]")
+                        currQuestion.insert(1, conjugatedVerb)
+                    if len(currQuestion) > 2:
+                        q = " ".join(currQuestion[1:])
+                        self.addQuestionToDict(q, WHEN)
+            except:
+                pass
 
     def generateBinary(self, sent):
         """Method that will look generate a binary question from ROOT AUX
@@ -158,7 +161,9 @@ class Ask:
                             subj = ''.join(
                                 t.text_with_ws for t in self.spacyCorpus[first.i: last.i + 1])
 
-                            question_word = token.text.capitalize()
+                            question_word = token.text_with_ws.capitalize()
+                            if question_word.lower() not in ['is', 'was', 'are', 'were']:
+                                continue
                             question_body = subj + \
                                 ''.join(
                                     t.text_with_ws for t in self.spacyCorpus[token.i + 1: sent.end-1])
@@ -307,7 +312,8 @@ class Ask:
                 if head.pos_ in verbs and head.dep_ == "ROOT":
                     questionType = WHAT
 
-                    q = ''.join(t.text_with_ws for t in self.spacyCorpus[head.i:sent.end-1])
+                    q = ''.join(
+                        t.text_with_ws for t in self.spacyCorpus[head.i:sent.end-1])
 
                     qLower = q.lower()
                     tempSplit = qLower.split(" ")
@@ -315,7 +321,7 @@ class Ask:
                     if "he" in tempSplit or "she" in tempSplit:
                         questionType = WHO
 
-                    self.addQuestionToDict(q,questionType)
+                    self.addQuestionToDict(q, questionType)
 
     def addQuestionToDict(self, question, TYPE):
         """Method that adds a particular question to the dict based on question type
@@ -430,15 +436,22 @@ class Ask:
             scored_questions = {}
             for q in questions:
                 current_score = 0
+                question_tokens = q.split(" ")
 
-                if len(q) < 200 and len(q) > 100:
-                    current_score += 12
-                elif len(q) <= 100 and len(q) > 50:
-                    current_score += 10
-                elif len(q) <= 50:
-                    current_score += 8
-                else:
-                    current_score += 5
+                ideal_number_tokens = 8
+
+                diff_from_ideal = abs(ideal_number_tokens-len(question_tokens))
+
+                current_score -= diff_from_ideal
+
+                # if len(q) < 200 and len(q) > 100:
+                #     current_score += 12
+                # elif len(q) <= 100 and len(q) > 50:
+                #     current_score += 10
+                # elif len(q) <= 50:
+                #     current_score += 8
+                # else:
+                #     current_score += 5
 
                 scored_questions[q] = current_score
 
