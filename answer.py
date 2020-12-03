@@ -46,11 +46,7 @@ class Answer:
         self.nlp = spacy.load("en_core_web_lg")  # spacy model
 
 
-        # # read in BERT model and tokenizer
-        # self.tokenizer = AutoTokenizer.from_pretrained(
-        #     "deepset/bert-base-cased-squad2")
-        # self.model = AutoModelForQuestionAnswering.from_pretrained(
-        #     "deepset/bert-base-cased-squad2")
+        # read in BERT model and tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained("bert-large-cased-whole-word-masking-finetuned-squad")
         self.model = AutoModelForQuestionAnswering.from_pretrained("bert-large-cased-whole-word-masking-finetuned-squad")
         self.qWords = set([WHAT, WHEN, WHO, WHERE, WHY, HOW, WHICH, "WHOSE", "WHOM"])
@@ -65,9 +61,7 @@ class Answer:
         self.corpus = p.parseCorpus(self.article)
 
         self.questions = re.sub(r"[\n]+", " ", self.questions)
-        # print(self.questions)
         self.spacyCorpus = self.nlp(self.corpus)
-        # self.spacyQuestions = self.nlp(self.questions)
 
     def questionProcessing(self, qWords=None, model=None):
         """ Specialized parsing for the questions. 
@@ -77,12 +71,10 @@ class Answer:
             [list]: list of Question Object, each stores info on the question: type, vec, raw, parsed
         """
         # This is the only model I tried. First time running should cause a download but afterwards it doesnt download.
-        # model = SentenceTransformer('distilbert-base-nli-mean-tokens')
         if model is None:
             model = SentenceTransformer('distilbert-base-nli-mean-tokens')
         else:
             model = SentenceTransformer(model)
-        # model = SentenceTransformer('distilroberta-base-msmarco-v2')
         parsedQuestions = []
 
         # Since we are only looking at questions, we can split on '?'
@@ -165,8 +157,6 @@ class Answer:
             model = SentenceTransformer('distilbert-base-nli-mean-tokens')
         else:
             model = SentenceTransformer(model)
-        # model = SentenceTransformer("roberta-base-nli-stsb-mean-tokens")
-        # model = SentenceTransformer('distilroberta-base-msmarco-v2')
 
 
         # Gonna build the question without question words and '?'
@@ -326,16 +316,12 @@ def ensembleModel(qObjListA, qObjListB):
 
             if robertaScore and marcoScore < 0.31:
                 debugPrint("Answers below the cutoff")
-                # debugPrint(f"Marco Score: {marcoScore}, Roberta Score: {robertaScore}")
                 debugPrint("Marco Answer")
                 debugPrint("Answer {}: {} \nCOS SCORE: {}".format(i, orgAnswer_marco,  marcoScore))
                 debugPrint("Roberta Answer:\nAnswer {}: {} \nCOS SCORE: {}".format(i, orgAnswer_roberta, robertaScore))
 
                 print("Answer not found!")
                 break
-
-            # debugPrint(f"{i} \t Marco: Score:{marcoScore}\n Answer: {orgAnswer_marco}")
-            # debugPrint(f"{i} \t Roberta: Score:{robertaScore}\n Answer: {orgAnswer_roberta}")
 
             if robertaScore < marcoScore:
                 debugPrint("Marco was chosen")
@@ -410,18 +396,3 @@ if __name__ == "__main__":
 
     ensembleModel(qsObjLst_marco, qsObjLst_roberta)
 
-    """
-    orgAnswer = "Pittsburgh was named in 1758 by General John Forbes, in honor of British statesman William Pitt, 1st Earl of Chatham."
-    orgQuestion = "When was Pittsburgh named by General John Forbes, in honor of British statesman William Pitt, 1st Earl of Chatham?"
-    print(answer.answerQuestion(orgQuestion, orgAnswer))
-    orgQuestion = "What was named in 1758 by General John Forbes?"
-    print(answer.answerQuestion(orgQuestion, orgAnswer))
-    orgQuestion = "Who named Pittsburgh in 1758?"
-    print(answer.answerQuestion(orgQuestion, orgAnswer))
-    orgQuestion = "In honor of whom was Pittsburgh named in 1758 by General John Forbes?"
-    print(answer.answerQuestion(orgQuestion, orgAnswer))
-
-    orgAnswer = "The first is called the Meidum pyramid, named for its location in Egypt first."
-    orgQuestion = "Who was the first Pharaoh of the Old Kingdom?"
-    print(answer.answerQuestion(orgQuestion, orgAnswer))
-    """
