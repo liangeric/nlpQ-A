@@ -151,8 +151,6 @@ class Ask:
             currQuestion.append(whenVerb)
             currQuestion.append(whenSubj.text)
             
-            for word in addThis:
-                currQuestion.append(word.text)
             if "[auxVerb]" in currQuestion:
                 currQuestion.remove("[auxVerb]")             
 
