@@ -22,7 +22,7 @@ from question import Question
 
 
 # If false the log function will not print
-DEBUG = True
+DEBUG = False
 
 def debugPrint(s, **kwargs):
     if DEBUG: print(s, **kwargs)

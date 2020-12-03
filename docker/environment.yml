@@ -1,6 +1,7 @@
 name: nlp_qa
 channels:
   - defaults
+  - pytorch
 dependencies:
   - python=3.8.2
   - numpy=1.19.2
