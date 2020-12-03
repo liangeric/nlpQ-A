@@ -367,12 +367,15 @@ class Ask:
         """
         question_tokens = []
         for token in sent:
-            text = token.text_with_ws
 
-            if TYPE == BINARY and token.i == 1 and token.pos_ != "PROPN":
+            text = token.text_with_ws
+            upper = token.pos_ == "PROPN" or token.ent_type_ in [
+                'GPE', 'LOC', 'PERSON', 'DATE', 'ORG', 'PRODUCT']
+
+            if TYPE == BINARY and token.i >= 1 and not upper:
                 text = text.lower()
 
-            if TYPE != BINARY and token.i == 0 and token.pos_ != "PROPN":
+            if TYPE != BINARY and token.i >= 0 and not upper:
                 text = text.lower()
 
             question_tokens.append(text)
