@@ -42,7 +42,7 @@ class Ask:
         """
         self.article = article
         self.nquestions = nquestions
-        self.nlp = spacy.load("en_core_web_md")  # spacy model
+        self.nlp = spacy.load("en_core_web_lg")  # spacy model
 
         self.questionsGenerated = {
             WHAT: set(),
