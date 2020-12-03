@@ -10,7 +10,7 @@ import copy
 
 import numpy as np
 import spacy
-import time
+
 
 from fuzzywuzzy import process
 
@@ -21,13 +21,6 @@ WHEN = "When"
 WHERE = "Where"
 WHO = "Who"
 BINARY = "Binary"
-
-DEBUG = False
-
-
-def debugPrint(s, **kwargs):
-    if DEBUG:
-        print(s, **kwargs)
 
 
 class Ask:
@@ -148,8 +141,6 @@ class Ask:
             currQuestion.append(whenVerb)
             currQuestion.append(whenSubj.text)
 
-            for word in addThis:
-                currQuestion.append(word.text)
             if "[auxVerb]" in currQuestion:
                 currQuestion.remove("[auxVerb]")
 
@@ -185,7 +176,6 @@ class Ask:
         """
         question = ""
         for token in sent:
-            # self.print_token(token)
             if token.pos_ == "AUX" and token.dep_ in ["ROOT", "ccomp"]:
                 for child in token.children:
                     if child.dep_ == "nsubj":
@@ -198,7 +188,7 @@ class Ask:
                             question_word = token.text.capitalize()
                             if question_word.strip().lower() not in ['is', 'was', 'are', 'were']:
                                 continue
-                            question_body = subj + \
+                            question_body = subj + " " + \
                                 ''.join(
                                     t.text_with_ws for t in self.spacyCorpus[token.i + 1: sent.end-1])
 
@@ -311,7 +301,6 @@ class Ask:
         questions = []
         verbs = set(["AUX", "VERB"])
         ner = set(["PERSON"])
-        pos = set(["PRON"])
         good_pos = set(["anybody", "anyone", "everybody", "everyone", "he", "her", "who"
                         "herself", "him", "himself", "I", "me", "no one", "nobody", "she", "she",
                         "somebody", "someone", "they", "them", "us", "thou", "we", "you"])
@@ -336,7 +325,6 @@ class Ask:
         Returns
         -------
         """
-        questions = []
         verbs = set(["AUX", "VERB"])
         ner = set(["ORG", "PRODUCT"])
 
@@ -455,7 +443,12 @@ class Ask:
             scored_questions = {}
             for q in questions:
                 question_nlp = self.nlp(q)
+
                 current_score = 0
+
+                for tok in question_nlp:
+                    if tok.pos_ == "PRON" and tok.dep_ == "nsubj":
+                        current_score -= 5
 
                 question_tokens = q.split(" ")
                 ents = question_nlp.ents
@@ -464,15 +457,14 @@ class Ask:
                 diff_ideal_tokens = abs(
                     ideal_number_tokens-len(question_tokens))
 
-                ideal_number_ents = 2
-                diff_ideal_ents = abs(ideal_number_ents - len(ents))
+                if len(ents) == 0:
+                    current_score -= 5
 
-                ideal_question_length = 175
-                diff_ideal_length = abs(ideal_question_length - len(q))
+                ideal_number_ents = 1.5
+                diff_ideal_ents = abs(ideal_number_ents-len(ents))
 
                 current_score -= diff_ideal_tokens
                 current_score -= diff_ideal_ents
-                current_score -= diff_ideal_length // 15
 
                 scored_questions[q] = current_score
 
@@ -573,7 +565,6 @@ class Ask:
 
 
 if __name__ == "__main__":
-    s = time.time()
     article, nquestions = sys.argv[1], sys.argv[2]
 
     article = open(article, "r", encoding="UTF-8").read()
@@ -590,5 +581,3 @@ if __name__ == "__main__":
     # ask.printGeneratedQuestions(WHEN)
     # ask.printGeneratedQuestions()  # prints all questions in self.questionsGenerated
     ask.chooseNQuestions()
-    e = time.time()
-    debugPrint(f"Tried to generate {nquestions}, took {e-s} seconds")
