@@ -6,15 +6,20 @@ Python command: python ask.py article.txt 21
 
 import sys
 import random
+import copy
 
 import numpy as np
 import spacy
+import time
+
 import time
 
 
 from fuzzywuzzy import process
 
 from parse import Parse
+
+random.seed(11411)  # REMOVE THIS
 
 
 WHAT = "What"
@@ -25,8 +30,11 @@ BINARY = "Binary"
 
 DEBUG = False
 
+
 def debugPrint(s, **kwargs):
-    if DEBUG: print(s, **kwargs)
+    if DEBUG:
+        print(s, **kwargs)
+
 
 class Ask:
     def __init__(self, article, nquestions):
@@ -174,6 +182,7 @@ class Ask:
             q = " ".join(currQuestion[1:])
             self.addQuestionToDict(q, WHEN)
                 
+
     def generateBinary(self, sent):
         """Method that will look generate a binary question from ROOT AUX
 
@@ -184,8 +193,6 @@ class Ask:
         Returns
         -------
         """
-        # TODO: Needs work on handling complex questions and weird edge cases
-
         question = ""
         for token in sent:
             # self.print_token(token)
@@ -199,6 +206,8 @@ class Ask:
                                 t.text_with_ws for t in self.spacyCorpus[first.i: last.i + 1])
 
                             question_word = token.text.capitalize()
+                            if question_word.strip().lower() not in ['is', 'was', 'are', 'were']:
+                                continue
                             question_body = subj + \
                                 ''.join(
                                     t.text_with_ws for t in self.spacyCorpus[token.i + 1: sent.end-1])
@@ -258,34 +267,46 @@ class Ask:
         Returns
         -------
         """
-        # TODO: This function is incomplete
         whereKeyWords = set(["to", "at", "between", "near",
                              "into", "on", "across", "in"])
-        listOfPrepositions = []
+
+        has_where_ent = False
+        for ent in sent.ents:
+            if ent.label_ in ["GPE", "LOC"]:
+                question = "is " + ent.text
+                self.addQuestionToDict(question, WHERE)
+                has_where_ent = True
+
+        if not has_where_ent:
+            return
+
         for token in sent:
-            self.print_token(token)
+
             if token.dep_ == "prep" and (token.head.pos_ == "AUX" or token.head.pos_ == "VERB"):
                 if token.text not in whereKeyWords:
                     continue
                 head_token = token.head
-                print("------ start head children ------")
+
                 for child in head_token.children:
-                    self.print_token(child)
-                    if child.dep_ == "nsubj":
-                        print(list(child.children))
-                        for newchild in child.children:
-                            print(newchild.text, list(newchild.children))
-                        nsubj = ''.join(
-                            [t.text_with_ws for t in child.children])
-                        nsubj += child.text_with_ws
-                        q = token.head.text_with_ws + nsubj
-                        self.addQuestionToDict(q, WHERE)
+                    if child.dep_ in ["nsubj", 'nsubjpass']:
+                        hasPROPN = False
+                        for t in child.subtree:
+                            if t.pos_ == "PROPN":
+                                hasPROPN = True
+                                break
 
-                print("------ end head children ------")
+                        if hasPROPN:
+                            aux_verb = self.spacyCorpus[head_token.i-1]
+                            if aux_verb.pos_ != "AUX":
+                                aux_verb = None
 
-                prepositionalPhrase = ''.join(
-                    [t.text_with_ws for t in token.subtree])
-                listOfPrepositions.append(prepositionalPhrase)
+                            noun_phrase = ''.join(
+                                t.text_with_ws for t in child.subtree)
+
+                            noun_phrase = noun_phrase if not aux_verb else aux_verb.text_with_ws + noun_phrase
+                            question = noun_phrase + head_token.text_with_ws
+
+                            self.addQuestionToDict(question, WHERE)
 
     def generateWho(self, sent):
         """Main method that will generate who questions given a sentence
@@ -301,14 +322,16 @@ class Ask:
         verbs = set(["AUX", "VERB"])
         ner = set(["PERSON"])
         pos = set(["PRON"])
+        good_pos = set(["anybody", "anyone", "everybody", "everyone", "he", "her", "who"
+                "herself", "him", "himself", "I", "me", "no one", "nobody", "she", "she",
+                "somebody", "someone", "they", "them", "us", "thou", "we", "you"])
 
         for token in sent:
-            if token.ent_type_ in ner or token.pos_ in pos:
+            if token.ent_type_ in ner or token.text.lower() in good_pos:
                 head = token.head
                 if head.pos_ in verbs and head.dep_ == "ROOT":
+                    questions.append(''.join(t.text_with_ws for t in self.spacyCorpus[head.i:sent.end-1]))
 
-                    questions.append(
-                        ''.join(t.text_with_ws for t in self.spacyCorpus[head.i:sent.end-1]))
 
         for q in questions:
             self.addQuestionToDict(q, WHO)
@@ -331,12 +354,18 @@ class Ask:
             if token.ent_type_ in ner:
                 head = token.head
                 if head.pos_ in verbs and head.dep_ == "ROOT":
+                    questionType = WHAT
 
-                    questions.append(
-                        ''.join(t.text_with_ws for t in self.spacyCorpus[head.i:sent.end-1]))
+                    q = ''.join(
+                        t.text_with_ws for t in self.spacyCorpus[head.i:sent.end-1])
 
-        for q in questions:
-            self.addQuestionToDict(q, WHAT)
+                    qLower = q.lower()
+                    tempSplit = qLower.split(" ")
+
+                    if "he" in tempSplit or "she" in tempSplit:
+                        questionType = WHO
+
+                    self.addQuestionToDict(q, questionType)
 
     def addQuestionToDict(self, question, TYPE):
         """Method that adds a particular question to the dict based on question type
@@ -382,12 +411,15 @@ class Ask:
         """
         question_tokens = []
         for token in sent:
-            text = token.text_with_ws
 
-            if TYPE == BINARY and token.i == 1 and token.pos_ != "PROPN":
+            text = token.text_with_ws
+            upper = token.pos_ == "PROPN" or token.ent_type_ in [
+                'GPE', 'LOC', 'PERSON', 'DATE', 'ORG', 'PRODUCT']
+
+            if TYPE == BINARY and token.i >= 1 and not upper:
                 text = text.lower()
 
-            if TYPE != BINARY and token.i == 0 and token.pos_ != "PROPN":
+            if TYPE != BINARY and token.i >= 0 and not upper:
                 text = text.lower()
 
             question_tokens.append(text)
@@ -402,7 +434,30 @@ class Ask:
         Returns
         -------
         """
-        for sent in self.spacyCorpus.sents:
+        number_sents = len(list(self.spacyCorpus.sents))
+        sent_start_end = {}
+        for index, sent in enumerate(self.spacyCorpus.sents):
+            sent_start_end[index] = {
+                "start": sent.start,
+                "end": sent.end
+            }
+
+        number_sentences_seen = 0
+
+        corpus_sents_index = [i for i in range(number_sents)]
+
+        while number_sentences_seen < 200:
+
+            if len(corpus_sents_index) <= 0:
+                break
+
+            sent_index = random.choice(corpus_sents_index)
+
+            sent_start = sent_start_end[sent_index]["start"]
+            sent_end = sent_start_end[sent_index]["end"]
+
+            sent = self.spacyCorpus[sent_start: sent_end]
+
             self.generateWhat(sent)
             self.generateWho(sent)
             self.generateWhAux(sent)
@@ -411,7 +466,11 @@ class Ask:
                 self.generateWhen(sent)
             except: 
                 continue
-            # self.generateWhere(sent)  # this method is not completed yet
+            
+            self.generateWhere(sent)  # this method is not completed yet
+
+            corpus_sents_index.remove(sent_index)
+            number_sentences_seen += 1
 
     def score_questions(self):
         """Method that will score questions and sort them in a list of dict
@@ -428,22 +487,23 @@ class Ask:
             scored_questions = {}
             for q in questions:
                 current_score = 0
-                q_doc = self.nlp(q)
-                ents = [(e.text, e.label_) for e in q_doc.ents]
-                current_score += len(ents) * 1.4
 
-                
-                # currently score is calculated by -length of question
-                current_score += 0
+                question_tokens = q.split(" ")
 
-                if len(q) < 200 and len(q) > 100:
-                    current_score += 12
-                elif len(q) <= 100 and len(q) > 50:
-                    current_score += 10
-                elif len(q) <= 50:
-                    current_score += 8
-                else:
-                    current_score += 5
+                ideal_number_tokens = 13
+                diff_ideal_tokens = abs(
+                    ideal_number_tokens-len(question_tokens))
+
+                current_score -= (diff_ideal_tokens)
+
+                # if len(q) < 200 and len(q) > 100:
+                #     current_score += 12
+                # elif len(q) <= 100 and len(q) > 50:
+                #     current_score += 10
+                # elif len(q) <= 50:
+                #     current_score += 8
+                # else:
+                #     current_score += 5
 
                 scored_questions[q] = current_score
 
@@ -475,28 +535,39 @@ class Ask:
                 print("Unable to generate more questions")
                 break
 
-            current_question_type = random.choice(question_types)
-            current_questions_set = generatedQuestions[current_question_type]
+            copy_question_types = copy.deepcopy(question_types)
+            for current_question_type in copy_question_types:
+                try:
+                    if self.nquestions <= 0:
+                        break
 
-            if len(current_questions_set) <= 0:
-                generatedQuestions.pop(
-                    current_question_type, None)
-                question_types.remove(current_question_type)
-            else:
-                pick_question = current_questions_set.pop()
+                    current_questions_set = generatedQuestions.get(
+                        current_question_type, None)
 
-                find_similar_questions = process.extract(
-                    pick_question, printed_questions, limit=2)
+                    if current_questions_set is None:
+                        continue
 
-                if len(find_similar_questions) > 0 and find_similar_questions[0][1] >= 90:
-                    continue
+                    if len(current_questions_set) <= 0:
+                        generatedQuestions.pop(
+                            current_question_type, None)
+                        question_types.remove(current_question_type)
+                    else:
+                        pick_question = current_questions_set.pop()
 
-                else:
-                    print(pick_question)
+                        find_similar_questions = process.extract(
+                            pick_question, printed_questions, limit=2)
 
-                    printed_questions.add(pick_question)
+                        if len(find_similar_questions) > 0 and find_similar_questions[0][1] >= 90:
+                            continue
 
-                    self.nquestions -= 1
+                        else:
+                            print(pick_question)
+
+                            printed_questions.add(pick_question)
+
+                            self.nquestions -= 1
+                except:
+                    pass
 
     def printGeneratedQuestions(self, TYPE=None):
         """Utility method that prints out all the questions based on question type for debugging purposes
@@ -516,8 +587,8 @@ class Ask:
                 for q in questions:
                     if q is not None and q != "":
                         print(q)
-                        # print(process.extract(q, questions, limit=2))
-                print("------done printing------")
+
+                print(f"---------- Done with {q_type} QUESTIONS ----------")
 
     def print_token(self, token):
         """Utility method that prints out information for a spacy token used to debug
@@ -529,10 +600,11 @@ class Ask:
         -------
         """
         print(
-            f"{token.text:<20}{token.pos_:<20}{token.dep_:<20}{token.head.text:<20}{token.head.dep_:<20}")
+            f"{token.text:<20}{token.pos_:<20}{token.dep_:<20}{token.ent_type_:<20}{token.head.text:<20}{token.head.dep_:<20}")
 
 
 if __name__ == "__main__":
+    random.seed(11411)
     s = time.time()
     article, nquestions = sys.argv[1], sys.argv[2]
 
