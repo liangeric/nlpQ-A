@@ -82,14 +82,14 @@ class Ask:
                 whenFound = False
             if tok.ent_type is not None and tok.ent_type_ in set(["DATE", "TIME"]):
                 if whenFound == False:
-                    whenVerb = tok #initialize verb to be date/time token
+                    whenVerb = tok  # initialize verb to be date/time token
                     whenFound = True
                 whenClause.add(tok)
-        
+
         if rootVerb is None or len(whenClause) == 0:
             return
-        
-        #else: make a question
+
+        # else: make a question
         whenSubj = None
         stopSent_i = 0
         iteration = 0
@@ -97,18 +97,18 @@ class Ask:
         while whenVerb.pos_ != "VERB":
             if iteration == maxIter:
                 return
-            if whenVerb.head.pos_ == "VERB": 
+            if whenVerb.head.pos_ == "VERB":
                 whenVerbChild = whenVerb
             whenVerb = whenVerb.head
             iteration += 1
 
         plural = False  # default to singular
-        pastTense = True # default to past
+        pastTense = True  # default to past
         firstChunk = True
         whenObj = []
         rootVerbChildren = []
         for child in whenVerb.children:
-            
+
             if child.dep_ == "nsubj":
                 # plural vs singular
                 if firstChunk and child.tag_ == "NNPS" or child.tag_ == "NNS":
@@ -121,7 +121,7 @@ class Ask:
 
                 whenSubj = child
             rootVerbChildren.append(child)
-        
+
         for chunk in sent.noun_chunks:
             # don't want to add the when chunk
             whenTermFound = False
@@ -135,26 +135,23 @@ class Ask:
             elif chunk.root.dep_ == "dobj" and chunk.root.head == whenVerb:
                 whenObj.append(chunk)
             elif chunk.root.dep_ == "pobj":
-                if chunk.root.head.head is not None and len(whenObj) > 0 and chunk.root.head.head == whenObj[-1].root: 
+                if chunk.root.head.head is not None and len(whenObj) > 0 and chunk.root.head.head == whenObj[-1].root:
                     whenObj.append(chunk.root.head)
                     whenObj.append(chunk)
-        
-        
+
         if whenSubj is None:
             return
-        
-            
 
         currQuestion = ["When", "[auxVerb]"]
         if whenVerb.lemma_ == "be":
             currQuestion = currQuestion[:-1]
             currQuestion.append(whenVerb)
             currQuestion.append(whenSubj.text)
-            
+
             for word in addThis:
                 currQuestion.append(word.text)
             if "[auxVerb]" in currQuestion:
-                currQuestion.remove("[auxVerb]")             
+                currQuestion.remove("[auxVerb]")
 
         else:
             if pastTense:
@@ -175,7 +172,6 @@ class Ask:
         if len(currQuestion) > 2:
             q = " ".join(currQuestion[1:])
             self.addQuestionToDict(q, WHEN)
-                
 
     def generateBinary(self, sent):
         """Method that will look generate a binary question from ROOT AUX
@@ -298,7 +294,7 @@ class Ask:
                                 t.text_with_ws for t in child.subtree)
 
                             noun_phrase = noun_phrase if not aux_verb else aux_verb.text_with_ws + noun_phrase
-                            question = noun_phrase + head_token.text_with_ws
+                            question = noun_phrase + " " + head_token.text_with_ws
 
                             self.addQuestionToDict(question, WHERE)
 
@@ -317,15 +313,15 @@ class Ask:
         ner = set(["PERSON"])
         pos = set(["PRON"])
         good_pos = set(["anybody", "anyone", "everybody", "everyone", "he", "her", "who"
-                "herself", "him", "himself", "I", "me", "no one", "nobody", "she", "she",
-                "somebody", "someone", "they", "them", "us", "thou", "we", "you"])
+                        "herself", "him", "himself", "I", "me", "no one", "nobody", "she", "she",
+                        "somebody", "someone", "they", "them", "us", "thou", "we", "you"])
 
         for token in sent:
             if token.ent_type_ in ner or token.text.lower() in good_pos:
                 head = token.head
                 if head.pos_ in verbs and head.dep_ == "ROOT":
-                    questions.append(''.join(t.text_with_ws for t in self.spacyCorpus[head.i:sent.end-1]))
-
+                    questions.append(
+                        ''.join(t.text_with_ws for t in self.spacyCorpus[head.i:sent.end-1]))
 
         for q in questions:
             self.addQuestionToDict(q, WHO)
@@ -407,6 +403,8 @@ class Ask:
         for token in sent:
 
             text = token.text_with_ws
+            if text.isspace():
+                continue
             upper = token.pos_ == "PROPN" or token.ent_type_ in [
                 'GPE', 'LOC', 'PERSON', 'DATE', 'ORG', 'PRODUCT']
 
@@ -428,43 +426,19 @@ class Ask:
         Returns
         -------
         """
-        number_sents = len(list(self.spacyCorpus.sents))
-        sent_start_end = {}
-        for index, sent in enumerate(self.spacyCorpus.sents):
-            sent_start_end[index] = {
-                "start": sent.start,
-                "end": sent.end
-            }
 
-        number_sentences_seen = 0
-
-        corpus_sents_index = [i for i in range(number_sents)]
-
-        while number_sentences_seen < 200:
-
-            if len(corpus_sents_index) <= 0:
-                break
-
-            sent_index = random.choice(corpus_sents_index)
-
-            sent_start = sent_start_end[sent_index]["start"]
-            sent_end = sent_start_end[sent_index]["end"]
-
-            sent = self.spacyCorpus[sent_start: sent_end]
+        for sent in self.spacyCorpus.sents:
 
             self.generateWhat(sent)
             self.generateWho(sent)
             self.generateWhAux(sent)
             self.generateBinary(sent)
-            try: 
+            try:
                 self.generateWhen(sent)
-            except: 
+            except:
                 continue
-            
-            self.generateWhere(sent)  # this method is not completed yet
 
-            corpus_sents_index.remove(sent_index)
-            number_sentences_seen += 1
+            self.generateWhere(sent)
 
     def score_questions(self):
         """Method that will score questions and sort them in a list of dict
@@ -480,24 +454,25 @@ class Ask:
         for q_type, questions in self.questionsGenerated.items():
             scored_questions = {}
             for q in questions:
+                question_nlp = self.nlp(q)
                 current_score = 0
 
                 question_tokens = q.split(" ")
+                ents = question_nlp.ents
 
-                ideal_number_tokens = 13
+                ideal_number_tokens = 12
                 diff_ideal_tokens = abs(
                     ideal_number_tokens-len(question_tokens))
 
-                current_score -= (diff_ideal_tokens)
+                ideal_number_ents = 2
+                diff_ideal_ents = abs(ideal_number_ents - len(ents))
 
-                # if len(q) < 200 and len(q) > 100:
-                #     current_score += 12
-                # elif len(q) <= 100 and len(q) > 50:
-                #     current_score += 10
-                # elif len(q) <= 50:
-                #     current_score += 8
-                # else:
-                #     current_score += 5
+                ideal_question_length = 175
+                diff_ideal_length = abs(ideal_question_length - len(q))
+
+                current_score -= diff_ideal_tokens
+                current_score -= diff_ideal_ents
+                current_score -= diff_ideal_length // 15
 
                 scored_questions[q] = current_score
 
@@ -612,7 +587,7 @@ if __name__ == "__main__":
     # ask.printGeneratedQuestions(WHAT)
     # ask.printGeneratedQuestions(WHO)
     # ask.printGeneratedQuestions(WHERE)
-    #ask.printGeneratedQuestions(WHEN)
+    # ask.printGeneratedQuestions(WHEN)
     # ask.printGeneratedQuestions()  # prints all questions in self.questionsGenerated
     ask.chooseNQuestions()
     e = time.time()
