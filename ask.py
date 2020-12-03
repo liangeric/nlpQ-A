@@ -12,15 +12,9 @@ import numpy as np
 import spacy
 import time
 
-import time
-
-
 from fuzzywuzzy import process
 
 from parse import Parse
-
-random.seed(11411)  # REMOVE THIS
-
 
 WHAT = "What"
 WHEN = "When"
@@ -604,7 +598,6 @@ class Ask:
 
 
 if __name__ == "__main__":
-    random.seed(11411)
     s = time.time()
     article, nquestions = sys.argv[1], sys.argv[2]
 

@@ -1,25 +1,28 @@
 from answer import *
 
 def testAnswer():
-    article = open("a1.txt", "r", encoding="UTF-8").read()
-    questions = open("q.txt", "r", encoding="UTF-8").read()
-    correctAnswers = open("a1_correct.txt", encoding="UTF-8").read().splitlines()
+    article = open("data/set5/a5.txt", "r", encoding="UTF-8").read()
+    questions = open("data/set5/q5.txt", "r", encoding="UTF-8").read()
+    correctAnswers = open("data/set5/a5_correct.txt", encoding="UTF-8").read().splitlines()
 
     answer = Answer(article, questions)
     answer.preprocess()
-    qsObjLst = answer.similarity(distFunc=jaccardSim, k = 5)
+    qsObjLst = answer.similarity(distFunc=cosine, k = 1, model="distilroberta-base-msmarco-v2")
 
     scoring = []
     noAns = 0
     for qInd in range(len(qsObjLst)):
+        
         qObj = qsObjLst[qInd]
-        # Get question
-        orgQuestion = qObj.raw_question
-        print("Question: {}".format(qObj.raw_question))
-
         # Scoring answer
         answerScore = None
         actualAnswerSent = correctAnswers[qInd]
+
+        # Get question
+        orgQuestion = qObj.raw_question
+        print("Question {}: {}".format(qInd, qObj.raw_question))
+        print("Correct Answer: {}".format(actualAnswerSent))
+        
 
         for i in range(len(qObj.answers)):
             # Get answer
@@ -28,6 +31,7 @@ def testAnswer():
 
             print("Found Answer:")
             print(answer.answerQuestion(orgQuestion, orgAnswer))
+            
             print("\n")
             if orgAnswer.text == actualAnswerSent:
                 answerScore = i

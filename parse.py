@@ -16,6 +16,10 @@ class Parse:
         Returns:
             [str]: [new cleaned corpus]
         """
+        # remove see also and reference information
+        corpus = corpus.split("\nSee also\n")[0]
+        corpus = corpus.split("\nReferences\n")[0]
+
         corpus = corpus.strip()
 
         # convert to lower case, might not want to do this for parsing later

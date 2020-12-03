@@ -1,9 +1,8 @@
 from sentence_transformers import SentenceTransformer  # Pip installed
 from transformers import AutoModelForQuestionAnswering, AutoTokenizer
 
-tokenizer = AutoTokenizer.from_pretrained(
-    "deepset/bert-base-cased-squad2")
-model = AutoModelForQuestionAnswering.from_pretrained(
-    "deepset/bert-base-cased-squad2")
-model = SentenceTransformer('distilbert-base-nli-mean-tokens')
-# print("model downloaded")
+tokenizer = AutoTokenizer.from_pretrained("bert-large-cased-whole-word-masking-finetuned-squad")
+model = AutoModelForQuestionAnswering.from_pretrained("bert-large-cased-whole-word-masking-finetuned-squad")
+model1 = SentenceTransformer("roberta-large-nli-stsb-mean-tokens")
+model2 = SentenceTransformer("distilroberta-base-msmarco-v2")
+print("model downloaded") #  roberta-large-nli-stsb-mean-tokens

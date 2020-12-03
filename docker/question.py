@@ -26,33 +26,7 @@ class Question:
         self.spacyDoc = None
         # list of top-k answer sentences, in the format of a spacy sent objects
         self.answers = [] 
-
-# DEPRECIATED
-class QuestionProcess:
-    def __init__(self):
-        self.questions = None
-        self.question_words = set([WHAT, WHEN, WHO, WHERE, WHY, HOW, WHICH])
-
-    def get_question_class(self, raw_question):
-        """[get the question class for a raw_question storing question_type, modified sentence, raw question]
-
-        Args:
-            raw_question ([string]): [the raw question from input]
-
-        Returns:
-            Question: Question class representation of raw_question
-        """
-        words = raw_question.split(" ")
-        index = 0
-        while index < len(words):
-            question_type = words[index].upper()
-            if question_type in self.question_words:
-                index += 1
-                break
-            index += 1
-
-        question_type = BINARY if question_type not in self.question_words else question_type
-        return Question(raw_question, question_type, " ".join(words[index:]))
+        self.score = []
 
     def process_questions(self, file):
         """[process the question from a file]
