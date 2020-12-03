@@ -280,14 +280,16 @@ class Ask:
         verbs = set(["AUX", "VERB"])
         ner = set(["PERSON"])
         pos = set(["PRON"])
+        good_pos = set(["anybody", "anyone", "everybody", "everyone", "he", "her", "who"
+                "herself", "him", "himself", "I", "me", "no one", "nobody", "she", "she",
+                "somebody", "someone", "they", "them", "us", "thou", "we", "you"])
 
         for token in sent:
-            if token.ent_type_ in ner or token.pos_ in pos:
+            if token.ent_type_ in ner or token.text.lower() in good_pos:
                 head = token.head
                 if head.pos_ in verbs and head.dep_ == "ROOT":
+                    questions.append(''.join(t.text_with_ws for t in self.spacyCorpus[head.i:sent.end-1]))
 
-                    questions.append(
-                        ''.join(t.text_with_ws for t in self.spacyCorpus[head.i:sent.end-1]))
 
         for q in questions:
             self.addQuestionToDict(q, WHO)
@@ -539,6 +541,7 @@ class Ask:
                 for q in questions:
                     if q is not None and q != "":
                         print(q)
+                print(f"---------- Done with {q_type} QUESTIONS ----------")
 
     def print_token(self, token):
         """Utility method that prints out information for a spacy token used to debug
@@ -554,6 +557,7 @@ class Ask:
 
 
 if __name__ == "__main__":
+    random.seed(11411)
     s = time.time()
     article, nquestions = sys.argv[1], sys.argv[2]
 
