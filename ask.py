@@ -28,7 +28,7 @@ WHERE = "Where"
 WHO = "Who"
 BINARY = "Binary"
 
-DEBUG = True
+DEBUG = False
 
 
 def debugPrint(s, **kwargs):
@@ -77,69 +77,111 @@ class Ask:
 
         Returns: list of when questions
         """
+        # given sentence is not grammatically correct and has date/time
+        rootVerb = None
+        whenFound = False
+        whenClause = set()
+        for tok in sent:
+            if tok.dep_ is not None and tok.dep_ == "ROOT":
+                rootVerb = tok
+            if whenFound and (tok.ent_type is None or tok.ent_type not in set(["DATE", "TIME"])):
+                whenFound = False
+            if tok.ent_type is not None and tok.ent_type_ in set(["DATE", "TIME"]):
+                if whenFound == False:
+                    whenVerb = tok #initialize verb to be date/time token
+                    whenFound = True
+                whenClause.add(tok)
+        
+        if rootVerb is None or len(whenClause) == 0:
+            return
+        
+        #else: make a question
+        whenSubj = None
+        stopSent_i = 0
+        iteration = 0
+        maxIter = len(sent)
+        while whenVerb.pos_ != "VERB":
+            if iteration == maxIter:
+                return
+            if whenVerb.head.pos_ == "VERB": 
+                whenVerbChild = whenVerb
+            whenVerb = whenVerb.head
+            iteration += 1
 
-        for sent in self.spacyCorpus.sents:
-            try:
-                foundDate, foundEvent = False, False
-                whenQuestions = []
-                for ent in sent.ents:
-                    currQuestion, obj = ["When", "[auxVerb]"], None
-                    if ent.label_ in set(["DATE"]):
-                        foundDate = True
-                if foundDate:
-                    plural = False  # default to singular
-                    for chunk in sent.noun_chunks:
-                        if chunk.root.dep_ == "nsubj":
-                            currQuestion.append(chunk.text)
-                            assert(type(chunk.text) == str)
-                            currQuestion.append(chunk.root.head.lemma_)
-                            assert(type(chunk.root.head.lemma_) == str)
-                            rootVerb = chunk.root.head
-                            # plural vs singular
-                            if chunk.root.tag_ == "NNPS" or chunk.root.tag_ == "NNS":
-                                plural = True
-                            tagMap = self.nlp.vocab.morphology.tag_map[chunk.root.head.tag_]
-                            pastTense = False  # default to present tense
-                            if "Tense_past" in tagMap and tagMap["Tense_past"] == True:
-                                pastTense = True
+        plural = False  # default to singular
+        pastTense = True # default to past
+        firstChunk = True
+        whenObj = []
+        rootVerbChildren = []
+        for child in whenVerb.children:
+            
+            if child.dep_ == "nsubj":
+                # plural vs singular
+                if firstChunk and child.tag_ == "NNPS" or child.tag_ == "NNS":
+                    plural = True
+                tagMap = self.nlp.vocab.morphology.tag_map[whenVerb.tag_]
+                pastTense = False  # default to present tense
+                if firstChunk and "Tense_past" in tagMap and tagMap["Tense_past"] == True:
+                    pastTense = True
+                firstChunk = False
 
-                        if chunk.root.dep_ == "dobj" and chunk.root.head.text == rootVerb.text:
-                            obj = chunk.text
+                whenSubj = child
+            rootVerbChildren.append(child)
+        
+        for chunk in sent.noun_chunks:
+            # don't want to add the when chunk
+            whenTermFound = False
+            for whenTerm in whenClause:
+                if whenTerm.text in chunk.text:
+                    whenTermFound = True
+            if whenTermFound or whenVerbChild.text in chunk.root.head.text:
+                continue
+            if chunk.root.dep_ == "nsubj" and chunk.root.head == whenVerb:
+                whenSubj = chunk
+            elif chunk.root.dep_ == "dobj" and chunk.root.head == whenVerb:
+                whenObj.append(chunk)
+            elif chunk.root.dep_ == "pobj":
+                if chunk.root.head.head is not None and len(whenObj) > 0 and chunk.root.head.head == whenObj[-1].root: 
+                    whenObj.append(chunk.root.head)
+                    whenObj.append(chunk)
+        
+        
+        if whenSubj is None:
+            return
+        
+            
 
-                    if obj is not None:
-                        currQuestion.append(obj)
-                        assert(type(obj) == str)
-                    #  re parse for preposition and the object that relates to it.
-                    # for word in sent:
-                    #     prep = None
-                    #     if word.dep_ == "prep" and word.head.text == rootVerb:
-                    #         currQuestion.append((word, "prep"))
-                    #         prep = word.text
-                    #     if prep is not  None and word.head.text == prep:
-                    #         currQuestion.append((word, "pobj"))
-                    if rootVerb.lemma_ == "be":
-                        currQuestion = currQuestion[0:-1]
-                        if "[auxVerb]" in currQuestion:
-                            currQuestion.remove("[auxVerb]")
-                        currQuestion.insert(1, rootVerb.text)
-                        assert(type(rootVerb.text) == str)
-                    else:
-                        if pastTense:
-                            conjugatedVerb = "did"
-                        else:  # presentTense
-                            if plural:
-                                conjugatedVerb = "do"
-                            else:  # singular
-                                conjugatedVerb = "did"
+        currQuestion = ["When", "[auxVerb]"]
+        if whenVerb.lemma_ == "be":
+            currQuestion = currQuestion[:-1]
+            currQuestion.append(whenVerb)
+            currQuestion.append(whenSubj.text)
+            
+            for word in addThis:
+                currQuestion.append(word.text)
+            if "[auxVerb]" in currQuestion:
+                currQuestion.remove("[auxVerb]")             
 
-                        if "[auxVerb]" in currQuestion:
-                            currQuestion.remove("[auxVerb]")
-                        currQuestion.insert(1, conjugatedVerb)
-                    if len(currQuestion) > 2:
-                        q = " ".join(currQuestion[1:])
-                        self.addQuestionToDict(q, WHEN)
-            except:
-                pass
+        else:
+            if pastTense:
+                conjugatedVerb = "did"
+            else:  # presentTense
+                if plural:
+                    conjugatedVerb = "do"
+                else:  # singular
+                    conjugatedVerb = "did"
+
+            if "[auxVerb]" in currQuestion:
+                currQuestion.remove("[auxVerb]")
+            currQuestion.insert(1, conjugatedVerb)
+            currQuestion.append(whenSubj.text)
+            currQuestion.append(whenVerb.lemma_)
+            for chunk in whenObj:
+                currQuestion.append(chunk.text)
+        if len(currQuestion) > 2:
+            q = " ".join(currQuestion[1:])
+            self.addQuestionToDict(q, WHEN)
+                
 
     def generateBinary(self, sent):
         """Method that will look generate a binary question from ROOT AUX
@@ -420,7 +462,11 @@ class Ask:
             self.generateWho(sent)
             self.generateWhAux(sent)
             self.generateBinary(sent)
-            self.generateWhen(sent)
+            try: 
+                self.generateWhen(sent)
+            except: 
+                continue
+            
             self.generateWhere(sent)  # this method is not completed yet
 
             corpus_sents_index.remove(sent_index)
@@ -541,6 +587,7 @@ class Ask:
                 for q in questions:
                     if q is not None and q != "":
                         print(q)
+
                 print(f"---------- Done with {q_type} QUESTIONS ----------")
 
     def print_token(self, token):
@@ -572,7 +619,7 @@ if __name__ == "__main__":
     # ask.printGeneratedQuestions(WHAT)
     # ask.printGeneratedQuestions(WHO)
     # ask.printGeneratedQuestions(WHERE)
-    # ask.printGeneratedQuestions(WHEN)
+    #ask.printGeneratedQuestions(WHEN)
     # ask.printGeneratedQuestions()  # prints all questions in self.questionsGenerated
     ask.chooseNQuestions()
     e = time.time()
