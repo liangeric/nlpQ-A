@@ -334,15 +334,6 @@ class Ask:
             if len(currQuestion) > 2:
                 q = " ".join(currQuestion[1:])
                 self.addQuestionToDict(q, WHERE)
-            
-
-
-
-<<<<<<< HEAD
-=======
-                            noun_phrase = noun_phrase if not aux_verb else aux_verb.text_with_ws + noun_phrase
-                            question = noun_phrase + " " + head_token.text_with_ws
->>>>>>> e938fe574e9e9e7d8405ac6f87f0fae528889e22
 
 
     def generateWho(self, sent):
