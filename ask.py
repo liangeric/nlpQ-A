@@ -311,7 +311,7 @@ class Ask:
             currQuestion = ["Where", "[auxVerb]"]
             # this shouldn't happen bc the WHERE is in a prep phrase, but just in case
             if whereVerb.lemma == "be":
-                currQuestion = currquestion[:-1]
+                currQuestion = currQuestion[:-1]
                 currQuestion.append(whereVerb.text)
                 currQuestion.append(whereSubj.text)
             elif conjugatedVerb is not None:
