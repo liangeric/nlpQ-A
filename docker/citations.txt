@@ -1,8 +1,5 @@
 Below are our citations that helped us create this question and answer system:
 
-Part-of-Speech Tagging help:
-- https://spacy.io/usage/linguistic-features
-
 BERT pretrained model help:
 - https://huggingface.co/transformers/pretrained_models.html
 - https://towardsdatascience.com/bert-for-dummies-step-by-step-tutorial-fb90890ffe03
@@ -20,8 +17,12 @@ Similarity matching help:
 Spacy documentation help:
 - https://spacy.io/usage/spacy-101
 
-Dependency parsing with spacy:
+Spacy Dependency parsing:
 - http://mlreference.com/dependency-tree-spacy
+- https://spacy.io/usage/linguistic-features
+
+Spacy Tense Tagging help:
+https://github.com/explosion/spaCy/issues/2767
 
 General cheatsheet / help for quick lookup in spacy:
 - https://www.datacamp.com/community/blog/spacy-cheatsheet
