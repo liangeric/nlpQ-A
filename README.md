@@ -43,4 +43,4 @@ Everytime you pull from GitHub, run the command `conda env update -f environment
 2. Run `docker tag <image> <username>/<repository>:<tag>` to tag the image where `<image>` is the image name, `<username>` is your username and `<respository>` and `<tag>` are the corresponding repository and tag names which you can make. You can test if this works by running `sh test.sh <username>/<repository>:<tag>`.
 3. Run `docker push <username>/<repository>:<tag>` to push
 
-Current working docker can be pulled from [here](https://hub.docker.com/u/liangeric321)
+Current working docker can be pulled from [here](https://hub.docker.com/u/liangeric321). It should be noted that our final version is under finalproject, and the docker likely can not be run on most local machines, we reccomend for it to be run on AWS with a m5.xlarge EC2 instance, which has 4 vCPUs and 16GB of RAM (with Amazon Linux 2). However if you would like to run each of the two scripts answer and ask seperately, this can be done so locally.
