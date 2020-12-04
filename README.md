@@ -4,6 +4,8 @@ This is a NLP project that is a Question and Answer system created by Eric Liang
 
 Click [here](https://youtu.be/kg2jUaCN7gA) to see our progress report/project overview.
 
+Note that our data files have been zipped above, to use the data files you can simply unzip data files locally.
+
 ## Create Conda Environment
 
 Create the conda environment `conda env create --file environment.yml`
