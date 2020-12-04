@@ -1,2 +1,7 @@
 Below are our citations that helped us create this question and answer system:
 - 
+- https://spacy.io/usage/spacy-101
+- https://realpython.com/natural-language-processing-spacy-python/
+- http://mlreference.com/dependency-tree-spacy
+- https://www.datacamp.com/community/blog/spacy-cheatsheet
+- https://www.analyticsvidhya.com/blog/2020/03/spacy-tutorial-learn-natural-language-processing/
