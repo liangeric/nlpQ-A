@@ -96,11 +96,7 @@ class Ask:
             iteration += 1
 
         plural = False  # default to singular
-<<<<<<< HEAD
         pastTense = False # default to present
-=======
-        pastTense = True  # default to past
->>>>>>> e938fe574e9e9e7d8405ac6f87f0fae528889e22
         firstChunk = True
         whenObj = []
         rootVerbChildren = []
