@@ -17,9 +17,13 @@ Similarity matching help:
 - https://www.datacamp.com/community/tutorials/fuzzy-string-python
 - https://pypi.org/project/fuzzywuzzy/
 
-
+Spacy documentation help:
 - https://spacy.io/usage/spacy-101
-- https://realpython.com/natural-language-processing-spacy-python/
+
+Dependency parsing with spacy:
 - http://mlreference.com/dependency-tree-spacy
+
+General cheatsheet / help for quick lookup in spacy:
 - https://www.datacamp.com/community/blog/spacy-cheatsheet
 - https://www.analyticsvidhya.com/blog/2020/03/spacy-tutorial-learn-natural-language-processing/
+- https://realpython.com/natural-language-processing-spacy-python/
