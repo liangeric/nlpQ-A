@@ -1,2 +1,18 @@
 Below are our citations that helped us create this question and answer system:
-- 
+
+Part-of-Speech Tagging help:
+- https://spacy.io/usage/linguistic-features
+
+BERT pretrained model help:
+- https://huggingface.co/transformers/pretrained_models.html
+- https://towardsdatascience.com/bert-for-dummies-step-by-step-tutorial-fb90890ffe03
+
+NLTK tagger experimentation help
+- http://www.nltk.org/book/ch05.html
+
+Setting up Conda environment help
+- https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
+
+Similarity matching help:
+- https://www.datacamp.com/community/tutorials/fuzzy-string-python
+- https://pypi.org/project/fuzzywuzzy/
