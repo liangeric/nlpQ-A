@@ -103,7 +103,7 @@ class Ask:
             iteration += 1
 
         plural = False  # default to singular
-        pastTense = True # default to past
+        pastTense = False # default to present
         firstChunk = True
         whenObj = []
         rootVerbChildren = []
@@ -114,7 +114,6 @@ class Ask:
                 if firstChunk and child.tag_ == "NNPS" or child.tag_ == "NNS":
                     plural = True
                 tagMap = self.nlp.vocab.morphology.tag_map[whenVerb.tag_]
-                pastTense = False  # default to present tense
                 if firstChunk and "Tense_past" in tagMap and tagMap["Tense_past"] == True:
                     pastTense = True
                 firstChunk = False
@@ -148,7 +147,7 @@ class Ask:
         currQuestion = ["When", "[auxVerb]"]
         if whenVerb.lemma_ == "be":
             currQuestion = currQuestion[:-1]
-            currQuestion.append(whenVerb)
+            currQuestion.append(whenVerb.text)
             currQuestion.append(whenSubj.text)
             
             if "[auxVerb]" in currQuestion:
@@ -161,8 +160,7 @@ class Ask:
                 if plural:
                     conjugatedVerb = "do"
                 else:  # singular
-                    conjugatedVerb = "did"
-
+                    conjugatedVerb = "does"
             if "[auxVerb]" in currQuestion:
                 currQuestion.remove("[auxVerb]")
             currQuestion.insert(1, conjugatedVerb)
@@ -187,7 +185,6 @@ class Ask:
         """
         question = ""
         for token in sent:
-            # self.print_token(token)
             if token.pos_ == "AUX" and token.dep_ in ["ROOT", "ccomp"]:
                 for child in token.children:
                     if child.dep_ == "nsubj":
@@ -259,46 +256,100 @@ class Ask:
         Returns
         -------
         """
-        whereKeyWords = set(["to", "at", "between", "near",
-                             "into", "on", "across", "in"])
 
-        has_where_ent = False
-        for ent in sent.ents:
-            if ent.label_ in ["GPE", "LOC"]:
-                question = "is " + ent.text
-                self.addQuestionToDict(question, WHERE)
-                has_where_ent = True
+        whereChunk = []
+        whereVerbList = []
+        for chunk in sent.noun_chunks:
+            if chunk.root.ent_type_ in set(["GPE", "LOC"]) and chunk.root.dep_ == "pobj":
+                whereChunk.append(chunk)
+                whereVerbList.append(chunk.root) #initialize whereVerb to be where root token
 
-        if not has_where_ent:
+
+        if len(whereChunk) == 0:
             return
+        for chunk_i in range(len(whereChunk)): # possibly make a where question for each where chunk found
+            qChunk = whereChunk[chunk_i]
+            whereVerb = whereVerbList[chunk_i]
+            #make question
+            whereSubj = None
+            iteration = 0
+            maxIter = len(sent)
+            while whereVerb.pos_ != "VERB":
+                if iteration == maxIter:
+                    return
+                if whereVerb.head.pos_ == "VERB":
+                    whereVerbChild = whereVerb
+                whereVerb = whereVerb.head
+                iteration += 1
+            plural = False
+            pastTense = False
+            conjugatedVerb = None
+            whereObj = []
+            rootVerbChildrenExceptWhere = []
+            for child in whereVerb.children:
+                if child.dep_ == "nsubj":
+                    if child.tag_ == "NNPS" or child.tag_ == "NNS":
+                        plural = True
+                    tagMap = self.nlp.vocab.morphology.tag_map[whereVerb.tag_]
+                    if "Tense_past" in tagMap and tagMap["Tense_past"] == True:
+                        pastTense = True
+                    whereSubj = child
+                elif chunk.root.dep == "aux":
+                    conjugatedVerb = chunk
+                if child != whereVerbChild: #don't want the where prep phrase
+                    rootVerbChildrenExceptWhere.append(child)
 
-        for token in sent:
-
-            if token.dep_ == "prep" and (token.head.pos_ == "AUX" or token.head.pos_ == "VERB"):
-                if token.text not in whereKeyWords:
+            for chunk in sent.noun_chunks:
+                whereTermFound = False
+                if qChunk.text == chunk.text:
+                    whereTermFound = True
+                if whereTermFound or whereVerbChild.text in chunk.root.head.text:
                     continue
-                head_token = token.head
+                
+                if chunk.root.dep_ == "nsubj" and chunk.root.head == whereVerb:
+                    whereSubj = chunk
+                elif chunk.root.dep_ == "dobj" and chunk.root.head == whereVerb:
+                    whereObj.append(chunk)
+                elif chunk.root.dep_ == "pobj":
+                    if chunk.root.head.head is not None and len(whereObj) > 0 and chunk.root.head.head == whereObj[-1].root:
+                        whereObj.append(chunk.root.head)
+                        whereObj.append(chunk)
+                
 
-                for child in head_token.children:
-                    if child.dep_ in ["nsubj", 'nsubjpass']:
-                        hasPROPN = False
-                        for t in child.subtree:
-                            if t.pos_ == "PROPN":
-                                hasPROPN = True
-                                break
+            if whereSubj is None:
+                return
 
-                        if hasPROPN:
-                            aux_verb = self.spacyCorpus[head_token.i-1]
-                            if aux_verb.pos_ != "AUX":
-                                aux_verb = None
+            currQuestion = ["Where", "[auxVerb]"]
+            #this shouldn't happen bc the WHERE is in a prep phrase, but just in case
+            if whereVerb.lemma == "be":
+                currQuestion = currquestion[:-1]
+                currQuestion.append(whereVerb.text)
+                currQuestion.append(whereSubj.text)
+            elif conjugatedVerb is not None:
+                continue
+            else:
+                if pastTense:
+                    conjugatedVerb = "did"
+                elif not pastTense: #presentTense
+                    if plural:
+                        conjugatedVerb = "do"
+                    else: #singular
+                        conjugatedVerb = "does"
+                if "[auxVerb]" in currQuestion:
+                    currQuestion.remove("[auxVerb]")
+                currQuestion.insert(1, conjugatedVerb)
+                currQuestion.append(whereSubj.text)
+                currQuestion.append(whereVerb.lemma_)
+                for chunk in whereObj:
+                    currQuestion.append(chunk.text)
+            if len(currQuestion) > 2:
+                q = " ".join(currQuestion[1:])
+                self.addQuestionToDict(q, WHERE)
+            
 
-                            noun_phrase = ''.join(
-                                t.text_with_ws for t in child.subtree)
 
-                            noun_phrase = noun_phrase if not aux_verb else aux_verb.text_with_ws + noun_phrase
-                            question = noun_phrase + head_token.text_with_ws
 
-                            self.addQuestionToDict(question, WHERE)
+
 
     def generateWho(self, sent):
         """Main method that will generate who questions given a sentence
@@ -610,7 +661,7 @@ if __name__ == "__main__":
     # ask.printGeneratedQuestions(WHAT)
     # ask.printGeneratedQuestions(WHO)
     # ask.printGeneratedQuestions(WHERE)
-    #ask.printGeneratedQuestions(WHEN)
+    # ask.printGeneratedQuestions(WHEN)
     # ask.printGeneratedQuestions()  # prints all questions in self.questionsGenerated
     ask.chooseNQuestions()
     e = time.time()
