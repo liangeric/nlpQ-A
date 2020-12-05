@@ -3,6 +3,7 @@ Below are our citations that helped us create this question and answer system:
 BERT pretrained model help:
 - https://huggingface.co/transformers/pretrained_models.html
 - https://towardsdatascience.com/bert-for-dummies-step-by-step-tutorial-fb90890ffe03
+- https://www.sbert.net/docs/pretrained_models.html
 
 NLTK tagger experimentation help
 - http://www.nltk.org/book/ch05.html
