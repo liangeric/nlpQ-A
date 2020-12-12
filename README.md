@@ -2,7 +2,9 @@
 
 This is a NLP project that is a Question and Answer system created by Eric Liang, Samarth Gowda, Melissa Yang, and Raymond Yang.
 
-Click [here](https://youtu.be/kg2jUaCN7gA) to see our progress report/project overview.
+Click [here](https://youtu.be/vO1l9aryJ7M) to watch out final progress report and a complete overview of our final system.
+
+Click [here](https://youtu.be/kg2jUaCN7gA) to see our initial progress report/project overview.
 
 Note that our data files have been zipped above, to use the data files you can simply unzip the two data files locally.
 
